@@ -1,0 +1,1075 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CryptoStake — Dashboard</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- AOS -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+   <link rel="stylesheet" href="./font-awesome.min.css"/>
+   <link rel="stylesheet" href="./font-awesome.css"/>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+/* SCROLLBAR MODERNO (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  border-radius: 14px;
+  border: 2px solid rgba(255,255,255,0.15);
+  backdrop-filter: blur(6px);
+  transition: 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--accent-2), var(--accent));
+  border-color: rgba(255,255,255,0.25);
+}
+
+/* FIREFOX */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) transparent;
+}
+
+/* Optional: smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+  
+  
+  
+    :root{
+      --bg-top: #0c0f18;
+      --bg-bottom: #05060a;
+      --glass: rgba(255,255,255,0.04);
+      --glass-2: rgba(255,255,255,0.02);
+      --neon: rgba(79,70,229,0.18);
+      --accent: #4f46e5;
+      --accent-2: #06b6d4;
+      --text: #ffffff;
+      --muted: rgba(255,255,255,0.6);
+    }
+
+    /* Light mode overrides (applies when body.light-mode) */
+    body.light-mode {
+      --bg-top: #f8fafc;
+      --bg-bottom: #eef2ff;
+      --glass: rgba(0,0,0,0.04);
+      --glass-2: rgba(0,0,0,0.02);
+      --neon: rgba(79,70,229,0.12);
+      --accent: #2563eb;
+      --accent-2: #06b6d4;
+      --text: #0b1220;
+      --muted: rgba(11,18,32,0.6);
+    }
+
+    html,body{ height:100%; }
+    body {
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color:var(--text);
+      background: radial-gradient(circle at top, var(--bg-top), var(--bg-bottom));
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+.card {
+    background: linear-gradient(180deg, rgb(151 44 44 / 4%), rgb(0 31 255 / 8%));
+    backdrop-filter: blur(10px);
+    border: 1px solid rgb(255 255 255 / 14%);
+    border-radius: 12px;
+}
+
+    .animate-fadeIn { animation: fadeIn .45s ease both; }
+    @keyframes fadeIn { from{ opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+
+    /* POPUP (glass neon) */
+    .popup-root {
+      position: fixed;
+      inset: 0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:999;
+      pointer-events:none;
+    }
+    .popup-backdrop {
+      position:absolute; inset:0; background:linear-gradient(180deg, rgba(2,6,23,0.6), rgba(2,6,23,0.75)); backdrop-filter: blur(4px); opacity:0; transition: opacity .32s ease;
+    }
+    .popup-card {
+      position:relative;
+      width: 420px;
+      max-width:94%;
+      border-radius:14px;
+      padding:20px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border:1px solid rgba(79,70,229,0.14);
+      box-shadow: 0 10px 40px rgba(79,70,229,0.08), 0 2px 8px rgba(2,6,23,0.6);
+      transform: translateY(18px) scale(.98);
+      opacity:0;
+      transition: transform .42s cubic-bezier(.2,.9,.3,1), opacity .28s ease;
+      pointer-events:auto;
+      overflow:hidden;
+    }
+    .popup-root.open .popup-backdrop { opacity:1; }
+    .popup-root.open .popup-card { transform: translateY(0) scale(1); opacity:1; }
+
+    .neon-border {
+      position:absolute; inset:-1px; border-radius:15px; pointer-events:none;
+      background: linear-gradient(90deg, rgba(79,70,229,0.18), rgba(6,182,212,0.12));
+      filter: blur(10px); opacity:0.9;
+      mix-blend-mode: screen;
+    }
+
+    /* Blur content when popup open */
+    body.popup-open #blur-wrap { filter: blur(6px) saturate(1.05); pointer-events:none; user-select:none; }
+
+    /* Responsive adjustments */
+    @media (max-width:768px){
+      .card { border-radius:10px; }
+      .popup-card { width:92%; padding:16px; }
+      .grid-responsive { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+    }
+
+    /* Small UI helpers */
+    .btn-primary { background:linear-gradient(90deg,var(--accent),var(--accent-2)); color:black; }
+    .muted { color:var(--muted); }
+
+    /* Toggle style */
+    .toggle {
+      display:inline-flex; align-items:center; gap:8px; cursor:pointer; user-select:none;
+      background:var(--glass-2); padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,0.04);
+    }
+.px-4 py-2{
+    -webkit-appearance: button;
+    background-color: #000000;
+    background-image: none;
+    border-color: #052855;
+}
+
+button, input:where([type=button]), input:where([type=reset]), input:where([type=submit]) {
+    -webkit-appearance: button;
+    background-color: #000000;
+    background-image: none;
+}
+
+#profileMenu {
+  animation: fadeMenu .18s ease-out;
+}
+
+@keyframes fadeMenu {
+  from { opacity:0; transform: translateY(-6px); }
+  to { opacity:1; transform: translateY(0); }
+}
+
+
+/* ===== HEADER ENHANCEMENTS ===== */
+
+.balance-box:hover #userBalance {
+  animation: balancePulse .6s ease;
+}
+
+@keyframes balancePulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+/* VIP BADGES */
+.vip-badge {
+  font-size: 0.6rem;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-weight: 800;
+}
+.vip-silver { background:#9ca3af; color:#000; }
+.vip-gold { background:#facc15; color:#000; }
+.vip-diamond {
+  background:linear-gradient(90deg,#38bdf8,#a855f7);
+  color:#000;
+}
+
+/* NOTIFICATIONS */
+.notif-dot {
+  position:absolute;
+  top:8px; right:8px;
+  width:8px; height:8px;
+  background:#22c55e;
+  border-radius:50%;
+  box-shadow:0 0 8px #22c55e;
+}
+
+.notif-item {
+  padding:8px;
+  font-size:.85rem;
+  border-radius:8px;
+}
+.notif-item:hover { background:rgba(255,255,255,0.06); }
+
+/* AVATAR */
+.avatar-circle {
+  width:40px; height:40px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#22c55e,#06b6d4);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  color:black;
+  overflow:hidden;
+}
+.avatar-circle img {
+  width:100%; height:100%;
+  object-fit:cover;
+}
+.avatar-initials {
+  position:absolute;
+}
+
+/* MENU */
+.menu-item {
+  display:block;
+  padding:8px;
+  border-radius:8px;
+}
+.menu-item:hover { background:rgba(255,255,255,0.08); }
+
+/* HEADER SCROLL EFFECT */
+header.shrink {
+  padding-top:6px;
+  padding-bottom:6px;
+  box-shadow:0 0 30px rgba(0,255,200,0.35);
+}
+
+
+/* ================= MOBILE HEADER ================= */
+.mobile-header {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: linear-gradient(
+    180deg,
+    rgba(3,10,25,0.7),
+    rgba(3,10,25,0.95)
+  );
+  backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(0,255,200,0.25);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 10px 6px env(safe-area-inset-bottom);
+}
+
+/* items */
+.m-item {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.65);
+  font-size: 0.65rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.m-item.active { color:#00ff9c; }
+
+.m-icon {
+  font-size: 1.15rem;
+}
+
+/* CENTER BALANCE */
+.m-balance {
+  transform: translateY(-14px);
+  background: linear-gradient(135deg,#022,#014);
+  border-radius: 18px;
+  padding: 8px 12px;
+  box-shadow: 0 0 25px rgba(0,255,200,0.45);
+  animation: balancePulse 2.6s infinite ease-in-out;
+}
+
+.m-balance-top {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #00ff9c;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.m-balance-sub {
+  font-size: 0.55rem;
+  color: rgba(255,255,255,0.55);
+}
+
+/* avatar mobile */
+.m-avatar {
+  width: 36px;
+  height: 36px;
+}
+
+/* fly menus */
+.mobile-fly-menu {
+  position: fixed;
+  bottom: 80px;
+  right: 12px;
+  width: 220px;
+  background: rgba(20,20,20,0.96);
+  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(18px);
+  border-radius: 14px;
+  padding: 10px;
+  z-index: 99999;
+}
+
+/* body spacing */
+@media(max-width:768px){
+  body { padding-bottom: 100px; }
+}
+
+  </style>
+</head>
+
+<body>
+
+<!-- POPUP (PREMIUM GLASS NEON) -->
+<div id="popup" class="popup-root" aria-hidden="true">
+  <div class="popup-backdrop" role="presentation"></div>
+
+  <div class="popup-card" role="dialog" aria-modal="true" aria-labelledby="popupTitle">
+    <div class="neon-border" aria-hidden="true"></div>
+
+    <h3 id="popupTitle" class="text-xl font-semibold mb-2">Under Maintenance</h3>
+    <p class="muted mb-4">This feature is temporarily unavailable. We're improving things — try again later.</p>
+
+    <div class="flex gap-3">
+      <button id="popupCloseBtn" class="px-4 py-2 rounded-md border border-white/6">Close</button>
+      <button id="popupNotify" class="px-4 py-2 rounded-md btn-primary">Notify me</button>
+    </div>
+  </div>
+</div>
+
+<!-- WRAP - will blur when popup open -->
+<div id="blur-wrap">
+
+<!-- NAVBAR SUPER RESPONSIVE -->
+<header id="mainHeader"
+  class="w-full px-4 py-3 flex items-center justify-between sticky top-0 z-50 overflow-visible
+  backdrop-blur-xl bg-[rgba(5,8,15,0.55)] border-b border-white/10 transition-all duration-300">
+
+  <!-- LEFT -->
+  <div class="flex items-center gap-3 min-w-0">
+    <div class="text-xl font-extrabold whitespace-nowrap
+        bg-gradient-to-r from-[var(--accent)] to-[var(--accent-2)]
+        bg-clip-text text-transparent">
+      CryptoStake
+    </div>
+    <div class="text-xs text-white/60 hidden xs:block">Dashboard</div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="hidden md:flex items-center gap-4">
+
+    <!-- BALANCE -->
+    <div class="balance-box text-right cursor-pointer">
+      <div class="text-xs text-white/50">Balance</div>
+      <div id="userBalance" class="text-sm font-bold text-emerald-400">
+        $12,450.32
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="relative">
+      <button id="notifBtn"
+        class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10
+        flex items-center justify-center relative">
+        🔔
+        <span class="notif-dot"></span>
+      </button>
+
+      <div id="notifMenu"
+        class="absolute right-0 top-full mt-2 hidden
+        w-72 bg-[rgba(20,20,20,0.95)]
+        border border-white/10 backdrop-blur-xl
+        rounded-xl p-3 z-[9999]">
+
+        <div class="notif-item">💰 Weekly payout processed</div>
+        <div class="notif-item">🎁 $20 Bonus received</div>
+        <div class="notif-item">📈 Staking rewards updated</div>
+      </div>
+    </div>
+
+    <!-- DEPOSIT -->
+    <button
+      class="px-5 py-2 rounded-xl text-sm font-semibold text-black
+      bg-gradient-to-r from-emerald-400 to-cyan-400
+      shadow-[0_0_18px_rgba(52,211,153,0.55)]
+      hover:shadow-[0_0_30px_rgba(52,211,153,0.85)]
+      transition-all">
+      Deposit
+    </button>
+
+    <!-- USER -->
+    <div class="relative flex items-center gap-3">
+
+      <!-- NAME + VIP -->
+      <div class="text-sm font-medium text-white/80 flex items-center gap-2">
+        John D.
+        <span class="vip-badge vip-gold">GOLD</span>
+      </div>
+
+      <!-- AVATAR -->
+      <button id="profileBtn" class="avatar-circle">
+        <img src="./profile.png" onerror="this.style.display='none'">
+        <span class="avatar-initials">JD</span>
+      </button>
+
+      <!-- MENU -->
+      <div id="profileMenu"
+        class="absolute right-0 top-full mt-2 hidden
+        bg-[rgba(20,20,20,0.95)]
+        border border-white/10 backdrop-blur-xl
+        p-2 rounded-xl w-44 z-[9999]">
+
+        <a class="menu-item">Wallet</a>
+        <a class="menu-item">Account</a>
+        <hr class="border-white/10 my-2">
+        <a class="menu-item text-red-400">Sign out</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+
+
+<script>
+document.getElementById("mobileMenuBtn").onclick = () => {
+  const el = document.getElementById("navbarRight");
+  el.classList.toggle("max-md:hidden");
+};
+</script>
+
+<!-- MOBILE BOTTOM NAV -->
+<!-- ================= MOBILE BOTTOM HEADER ================= -->
+<nav id="mobileHeader" class="mobile-header md:hidden">
+
+  <!-- Home -->
+  <button class="m-item active">
+    <span class="m-icon">🏠</span>
+    <span>Home</span>
+  </button>
+
+  <!-- Stake -->
+  <button class="m-item">
+    <span class="m-icon">⚡</span>
+    <span>Stake</span>
+  </button>
+
+  <!-- CENTER BALANCE -->
+  <button class="m-balance balance-box">
+    <div class="m-balance-top">
+      <span class="vip-badge vip-gold">GOLD</span>
+      <span id="userBalanceMobile">$12,450.32</span>
+    </div>
+    <div class="m-balance-sub">Balance</div>
+  </button>
+
+  <!-- Notifications -->
+  <button id="notifBtnMobile" class="m-item relative">
+    <span class="m-icon">🔔</span>
+    <span>Alerts</span>
+    <span class="notif-dot"></span>
+  </button>
+
+  <!-- Profile -->
+  <button id="profileBtnMobile" class="avatar-circle m-avatar">
+    <img src="./profile.png" onerror="this.style.display='none'">
+    <span class="avatar-initials">JD</span>
+  </button>
+
+</nav>
+
+<!-- MOBILE PROFILE MENU -->
+<div id="profileMenuMobile" class="mobile-fly-menu hidden">
+  <a class="menu-item">Wallet</a>
+  <a class="menu-item">Account</a>
+  <hr class="border-white/10 my-2">
+  <a class="menu-item text-red-400">Sign out</a>
+</div>
+
+<!-- MOBILE NOTIFICATIONS -->
+<div id="notifMenuMobile" class="mobile-fly-menu hidden">
+  <div class="notif-item">💰 Weekly payout processed</div>
+  <div class="notif-item">🎁 $20 Bonus received</div>
+  <div class="notif-item">📈 Staking rewards updated</div>
+</div>
+
+
+
+<!-- MAIN GRID WRAPPER -->
+ <!-- Wallet -->
+  <section class="card p-6 rounded-2xl animate-fadeIn" aria-labelledby="stakingTitle">
+    <div class="flex items-start justify-between">
+      <div>
+        <h3 id="stakingTitle" class="text-lg font-semibold">Wallet</h3>
+        <p class="text-sm muted mt-1"><i class="fa-solid fa-eye"></i> ID8032....38 <i class="fa-solid fa-copy"></i></p>
+        <div id="wallet" class="text-2xl font-bold mt-2"><i class="fa-solid fa-coins"></i> 0 USD</div>
+      </div>
+    </div>
+
+    <div class="mt-4 flex gap-3">
+      <button id="openStakeAll" class="btn-primary px-4 py-2 rounded-md">Deposit</button>
+      <button id="openUnstakeAll" class="px-4 py-2 rounded-md border">Withdraw</button>
+    </div>
+  </section>
+  
+<main class="p-4 md:p-6 grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+
+
+  <!-- STAKING PROGRESS -->
+  <section class="card p-6 rounded-2xl animate-fadeIn" aria-labelledby="stakingTitle">
+    <div class="flex items-start justify-between">
+      <div>
+        <h3 id="stakingTitle" class="text-lg font-semibold">Staking Progress</h3>
+        <p class="text-sm muted mt-1">Total Staked</p>
+        <div id="totalStaked" class="text-2xl font-bold mt-2">0 USDT</div>
+      </div>
+      <div class="text-right muted">
+        <div class="text-xs">Next cashout</div>
+        <div id="countdownTop" class="text-xl font-bold">--:--:--</div>
+      </div>
+    </div>
+
+    <div class="mt-6">
+      <div class="w-full h-4 rounded-full bg-white/6 overflow-hidden">
+        <div id="stakingBar" class="h-full w-[2%]" style="background:linear-gradient(90deg,var(--accent),var(--accent-2)); box-shadow:0 6px 18px rgba(79,70,229,0.08);"></div>
+      </div>
+      <div class="mt-3 text-sm muted">Progress to next tier: <strong id="progressPercent">0%</strong></div>
+    </div>
+
+    <div class="mt-4 flex gap-3">
+      <button id="openStakeAll" class="btn-primary px-4 py-2 rounded-md">Stake</button>
+      <button id="openUnstakeAll" class="px-4 py-2 rounded-md border">Unstake</button>
+    </div>
+  </section>
+
+  <!-- BALANCES PER COIN -->
+  <section class="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+
+    <!-- BTC -->
+    <article class="card p-4 rounded-xl flex items-center gap-3 animate-fadeIn" data-coin="BTC">
+      <img src="./bitcoin.png" class="w-12 h-12" alt="BTC"/>
+      <div class="flex-1">
+        <div class="text-sm muted">Bitcoin</div>
+        <div class="text-lg font-bold"><span id="btcAvailable">0.0000</span> BTC <span class="text-sm muted">(~$<span id="btcUsd">0</span>)</span></div>
+      </div>
+      <div class="text-right">
+        <div class="text-xs muted">Staked</div>
+        <div class="font-semibold" id="btcStaked">0.0000</div>
+        <div class="mt-2"><button onclick="openPopup()" class="px-3 py-1 rounded bg-gradient-to-r from-yellow-500 to-amber-400 text-black text-xs" data-action="stake" data-coin="BTC">Stake</button></div>
+      </div>
+    </article>
+
+    <!-- ETH -->
+    <article class="card p-4 rounded-xl flex items-center gap-3 animate-fadeIn" data-coin="ETH">
+      <img src="./ethereum.png" class="w-12 h-12" alt="ETH"/>
+      <div class="flex-1">
+        <div class="text-sm muted">Ethereum</div>
+        <div class="text-lg font-bold"><span id="ethAvailable">0.000</span> ETH <span class="text-sm muted">(~$<span id="ethUsd">0</span>)</span></div>
+      </div>
+      <div class="text-right">
+        <div class="text-xs muted">Staked</div>
+        <div class="font-semibold" id="ethStaked">0.000</div>
+        <div class="mt-2"><button onclick="openPopup()" class="px-3 py-1 rounded bg-gradient-to-r from-purple-500 to-indigo-400 text-black text-xs" data-action="stake" data-coin="ETH">Stake</button></div>
+      </div>
+    </article>
+
+    <!-- SOL -->
+    <article class="card p-4 rounded-xl flex items-center gap-3 animate-fadeIn" data-coin="SOL">
+      <img src="./solana.png" class="w-12 h-12" alt="SOL"/>
+      <div class="flex-1">
+        <div class="text-sm muted">Solana</div>
+        <div class="text-lg font-bold"><span id="solAvailable">0.00</span> SOL <span class="text-sm muted">(~$<span id="solUsd">0</span>)</span></div>
+      </div>
+      <div class="text-right">
+        <div class="text-xs muted">Staked</div>
+        <div class="font-semibold" id="solStaked">0.00</div>
+        <div class="mt-2"><button onclick="openPopup()" class="px-3 py-1 rounded bg-gradient-to-r from-cyan-400 to-emerald-300 text-black text-xs" data-action="stake" data-coin="SOL">Stake</button></div>
+      </div>
+    </article>
+
+    <!-- USDT -->
+    <article class="card p-4 rounded-xl flex items-center gap-3 animate-fadeIn" data-coin="USDT">
+      <img src="./tether.png" class="w-12 h-12" alt="USDT"/>
+      <div class="flex-1">
+        <div class="text-sm muted">USDT</div>
+        <div class="text-lg font-bold"><span id="usdtAvailable">0</span> USDT <span class="text-sm muted">(~$<span id="usdtUsd">0</span>)</span></div>
+      </div>
+      <div class="text-right">
+        <div class="text-xs muted">Staked</div>
+        <div class="font-semibold" id="usdtStaked">0</div>
+        <div class="mt-2"><button onclick="openPopup()" class="px-3 py-1 rounded bg-gradient-to-r from-green-400 to-emerald-300 text-black text-xs" data-action="stake" data-coin="USDT">Stake</button></div>
+      </div>
+    </article>
+
+  </section>
+
+  <!-- PORTFOLIO + STAKING POOLS -->
+  <section class="col-span-2 card p-6 rounded-2xl animate-fadeIn">
+    <div class="flex items-center justify-between">
+      <h3 class="text-lg font-semibold">Portfolio Overview</h3>
+      <div class="text-sm muted">7d</div>
+    </div>
+    <canvas id="portfolioChartAdvanced" height="120" class="mt-4"></canvas>
+
+    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="p-4 rounded-xl card border border-white/5">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="font-semibold">BTC Staking Pool</div>
+            <!-- APR text turned green -->
+            <div class="text-xs text-green-400 font-semibold">APR 8.5% • Locked</div>
+          </div>
+          <div>
+            <button onclick="openPopup()" class="px-3 py-1 rounded btn-primary text-xs" data-action="openPool" data-coin="BTC">Stake</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-xl card border border-white/5">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="font-semibold">USDT Staking Pool</div>
+            <!-- APR text turned green -->
+            <div class="text-xs text-green-400 font-semibold">APR 5.4% • Flexible</div>
+          </div>
+          <div>
+            <button onclick="openPopup()" class="px-3 py-1 rounded btn-primary text-xs" data-action="openPool" data-coin="USDT">Stake</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Staking Live Pool (expanded) -->
+  <section class="card p-6 rounded-2xl animate-fadeIn">
+    <h3 class="text-lg font-semibold">Staking Pool</h3>
+
+    <div class="mt-4 grid grid-cols-1 gap-3">
+      <div>
+        <div class="text-sm muted">Total Balance</div>
+        <div id="totalBalance" class="text-2xl font-bold">$0</div>
+      </div>
+
+      <div>
+        <div class="text-sm muted">Weekly Earnings</div>
+        <div class="text-lg font-bold text-green-400" id="weeklyEarnings">$0</div>
+      </div>
+
+      <div>
+        <div class="text-sm muted">Total Staked</div>
+        <div class="text-lg font-bold" data-total-staked>$0 USD</div>
+      </div>
+
+      <div>
+        <div class="text-sm muted">Rewards Earned (All time)</div>
+        <div class="text-lg font-bold text-green-400" data-rewards>$0</div>
+      </div>
+
+      <div>
+        <div class="text-sm muted">Active Pools</div>
+        <div class="text-lg font-bold" data-active-pools>0</div>
+      </div>
+
+      <div>
+        <div class="text-sm muted">Next Payout</div>
+        <div class="text-lg font-bold" data-next-payout>Fri, 22:00</div>
+      </div>
+
+      <div>
+        <div class="text-sm muted">Total Deposits</div>
+        <div class="text-lg font-bold" data-total-deposits>$0</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WEEKLY DIVIDENDS -->
+  <section class="col-span-2 card p-6 rounded-2xl animate-fadeIn">
+    <h3 class="text-lg font-semibold">Weekly Dividends</h3>
+    <canvas id="weeklyAdvanced" height="100" class="mt-4"></canvas>
+  </section>
+
+  <!-- RECENT WITHDRAWALS (TOP 10 LIVE) -->
+  <section class="card p-6 rounded-2xl animate-fadeIn">
+    <h3 class="text-lg font-semibold mb-3">Recent Withdrawals</h3>
+    <ul id="withdrawList" class="space-y-3 text-sm text-gray-300 max-h-[360px] overflow-auto" aria-live="polite" aria-atomic="true"></ul>
+    <button id="exportCsv" class="mt-4 w-full bg-yellow-600 py-2 rounded-xl">Export History</button>
+  </section>
+
+</main>
+
+</div> <!-- /blur-wrap -->
+
+<!-- AOS init -->
+<script>AOS.init({ duration: 600, once:true });</script>
+
+<script>
+/* ===============================
+   PROFILE + NOTIFICATIONS (DESKTOP + MOBILE) — FIXED
+   =============================== */
+
+const desktop = {
+  profileBtn: document.getElementById('profileBtn'),
+  profileMenu: document.getElementById('profileMenu'),
+  notifBtn: document.getElementById('notifBtn'),
+  notifMenu: document.getElementById('notifMenu'),
+};
+
+const mobile = {
+  profileBtn: document.getElementById('profileBtnMobile'),
+  profileMenu: document.getElementById('profileMenuMobile'),
+  notifBtn: document.getElementById('notifBtnMobile'),
+  notifMenu: document.getElementById('notifMenuMobile'),
+};
+
+function closeAll() {
+  desktop.profileMenu?.classList.add('hidden');
+  desktop.notifMenu?.classList.add('hidden');
+  mobile.profileMenu?.classList.add('hidden');
+  mobile.notifMenu?.classList.add('hidden');
+}
+
+function toggleMenu(targetMenu, menusToClose = []) {
+  const willOpen = targetMenu?.classList.contains('hidden');
+  // close others first
+  menusToClose.forEach(m => m?.classList.add('hidden'));
+  // toggle only target
+  if (!targetMenu) return willOpen;
+  targetMenu.classList.toggle('hidden');
+  return willOpen;
+}
+
+/* ===============================
+   PROFILE (desktop)
+   =============================== */
+desktop.profileBtn?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  toggleMenu(desktop.profileMenu, [
+    desktop.notifMenu,
+    mobile.profileMenu,
+    mobile.notifMenu
+  ]);
+});
+
+/* PROFILE (mobile) */
+mobile.profileBtn?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  toggleMenu(mobile.profileMenu, [
+    mobile.notifMenu,
+    desktop.profileMenu,
+    desktop.notifMenu
+  ]);
+});
+
+/* ===============================
+   NOTIFICATIONS (desktop)
+   =============================== */
+desktop.notifBtn?.addEventListener('click', (e) => {
+  e.stopPropagation();
+
+  const dot = desktop.notifBtn.querySelector('.notif-dot');
+  const opening = toggleMenu(desktop.notifMenu, [
+    desktop.profileMenu,
+    mobile.profileMenu,
+    mobile.notifMenu
+  ]);
+
+  if (opening) {
+    dot && (dot.style.display = 'none');
+    localStorage.setItem('notifRead-desktop', '1');
+  }
+});
+
+/* NOTIFICATIONS (mobile) */
+mobile.notifBtn?.addEventListener('click', (e) => {
+  e.stopPropagation();
+
+  const dot = mobile.notifBtn.querySelector('.notif-dot');
+  const opening = toggleMenu(mobile.notifMenu, [
+    mobile.profileMenu,
+    desktop.profileMenu,
+    desktop.notifMenu
+  ]);
+
+  if (opening) {
+    dot && (dot.style.display = 'none');
+    localStorage.setItem('notifRead-mobile', '1');
+  }
+});
+
+/* ===============================
+   CLICK OUTSIDE CLOSES ALL
+   =============================== */
+document.addEventListener('click', closeAll);
+
+/* ===============================
+   HEADER SHRINK (DESKTOP ONLY)
+   =============================== */
+const header = document.getElementById('mainHeader');
+if (header) {
+  window.addEventListener('scroll', () => {
+    header.classList.toggle('shrink', window.scrollY > 30);
+  });
+}
+</script>
+
+
+
+
+<!-- ------------------ Dummy API (simulated) ------------------ -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+console.log("Fetching...");
+
+  async function fetchLiveData() {
+    console.log("Fetching..."); // <-- para confirmar
+
+    try {
+      const res = await fetch("http://localhost/staking/streampools.php");
+      const data = await res.json();
+
+      document.getElementById('totalBalance').innerText =
+        "$" + data.totalBalance.toLocaleString();
+
+      document.getElementById('weeklyEarnings').innerText =
+        "$" + data.weeklyEarnings.toLocaleString();
+
+      document.querySelector('[data-total-staked]').innerText =
+        data.totalStaked.toLocaleString() + " USD";
+
+      document.querySelector('[data-rewards]').innerText =
+        "$" + data.rewardsEarned.toLocaleString();
+
+      document.querySelector('[data-active-pools]').innerText =
+        data.activePools;
+
+      document.querySelector('[data-next-payout]').innerText =
+        data.nextPayout;
+
+      document.querySelector('[data-total-deposits]').innerText =
+        "$" + data.totalDeposits.toLocaleString();
+
+    } catch (e) {
+      console.error("SERVER OFF", e);
+    }
+  }
+
+  // Primera carga
+  fetchLiveData();
+
+  // Cada 5 segundos
+  setInterval(fetchLiveData, 5000);
+
+});
+</script>
+
+
+
+<!-- ------------------ Charts ------------------ -->
+<script>
+window.addEventListener('load', ()=>{
+  const pCtx = document.getElementById('portfolioChartAdvanced').getContext('2d');
+  const gradP = pCtx.createLinearGradient(0,0,0,200);
+  gradP.addColorStop(0,'rgba(79,70,229,0.9)');
+  gradP.addColorStop(1,'rgba(6,182,212,0.08)');
+  const borderGrad = pCtx.createLinearGradient(0,0,600,0);
+  borderGrad.addColorStop(0,'rgba(79,70,229,1)'); borderGrad.addColorStop(1,'rgba(6,182,212,1)');
+  new Chart(pCtx, { type:'line', data:{ labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], datasets:[{ data:[12000,12500,12900,12700,13600,14200,15200], fill:true, backgroundColor:gradP, borderColor:borderGrad, borderWidth:3, tension:0.35, pointRadius:0 }] }, options:{ plugins:{ legend:{ display:false } }, scales:{ y:{ grid:{ color:'rgba(255,255,255,0.03)' } }, x:{ grid:{ display:false } } } } });
+
+  const wCtx = document.getElementById('weeklyAdvanced').getContext('2d');
+  const g1 = wCtx.createLinearGradient(0,0,0,200); g1.addColorStop(0,'rgba(0,255,200,0.9)'); g1.addColorStop(1,'rgba(0,255,200,0.2)');
+  const g2 = wCtx.createLinearGradient(0,0,0,200); g2.addColorStop(0,'rgba(120,90,255,0.9)'); g2.addColorStop(1,'rgba(120,90,255,0.2)');
+  const g3 = wCtx.createLinearGradient(0,0,0,200); g3.addColorStop(0,'rgba(255,180,0,0.95)'); g3.addColorStop(1,'rgba(255,180,0,0.2)');
+  new Chart(wCtx, { type:'bar', data:{ labels:['W43','W44','W45'], datasets:[{ data:[3200,560,1240], backgroundColor:[g1,g2,g3] }] }, options:{ plugins:{ legend:{ display:false } }, scales:{ y:{ grid:{ color:'rgba(255,255,255,0.03)' } } } } });
+});
+</script>
+
+<!-- ------------------ LIVE WITHDRAWALS (TOP 10) ------------------ -->
+<script>
+let withdrawData = [];
+const withdrawList = document.getElementById('withdrawList');
+
+function renderWithdraw(){
+  withdrawList.innerHTML='';
+  withdrawData.forEach((it,idx)=>{
+    const li=document.createElement('li');
+    li.className='flex justify-between items-center p-3 rounded-xl bg-white/3';
+    li.innerHTML = `<div class="flex items-center gap-3">
+                      <img src="${coinIconFromString(it.amount)}" class="w-8 h-8 rounded-full" alt="">
+                      <div class="text-sm">
+                        <div class="font-semibold">${it.amount}</div>
+                        <div class="text-xs muted">${it.week}</div>
+                      </div>
+                    </div>
+                    <div class="text-xs muted">${it.time || ''}</div>`;
+    withdrawList.appendChild(li);
+  });
+}
+
+function coinIconFromString(str){
+  if(str.indexOf('BTC')>-1) return './bitcoin.png';
+  if(str.indexOf('ETH')>-1) return './ethereum.png';
+  if(str.indexOf('SOL')>-1) return './solana.png';
+  return './tether.png';
+}
+
+function randCoin(){ return ['BTC','ETH','SOL','USDT'][Math.floor(Math.random()*4)]; }
+function randAmt(sym){ if(sym==='BTC') return (Math.random()*0.02+0.0004).toFixed(4)+' BTC'; if(sym==='ETH') return (Math.random()*0.2+0.005).toFixed(3)+' ETH'; if(sym==='SOL') return (Math.random()*3+0.1).toFixed(2)+' SOL'; return (Math.floor(Math.random()*900)+50)+' USDT'; }
+
+function shiftWithdraw(){
+  const sym=randCoin();
+  const item={ week:'Week '+(40+Math.floor(Math.random()*10)), amount:randAmt(sym), time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) };
+  withdrawData.unshift(item);
+  if(withdrawData.length>10) withdrawData.pop();
+  renderWithdraw();
+}
+
+for(let i=0;i<10;i++) shiftWithdraw();
+setInterval(shiftWithdraw,3500);
+</script>
+
+<!-- ------------------ COUNTDOWN ------------------ -->
+<script>
+function nextFri(){ const now=new Date(); const d=now.getDay(); const diff=(5-d+7)%7||7; const n=new Date(now); n.setDate(now.getDate()+diff); n.setHours(22,0,0,0); return n; }
+let target = nextFri();
+function updateCountdownTop(){ const now=new Date(); if(now>target) target = nextFri(); let diff=Math.max(0,target-now); const h=String(Math.floor(diff/3600000)).padStart(2,'0'); diff%=3600000; const m=String(Math.floor(diff/60000)).padStart(2,'0'); diff%=60000; const s=String(Math.floor(diff/1000)).padStart(2,'0'); const el=document.getElementById('countdownTop'); if(el) el.innerText = `${h}:${m}:${s}`; }
+setInterval(updateCountdownTop,1000); updateCountdownTop();
+</script>
+
+<!-- ------------------ MODALS (Stake/Unstake) kept (demo) ------------------ -->
+<script>
+const modalRoot = document.getElementById('popup'); // reuse popup for demo
+
+function openModal(type, coin){
+  // kept for compatibility, but demo opens the same popup
+  openPopup();
+}
+
+function closeModal(){ closePopup(); }
+
+// Hook stake buttons - there are already onclick handlers in markup, but keep these hookups for dynamic buttons if needed
+document.querySelectorAll('button[data-action="stake"]').forEach(b=> b.addEventListener('click', (e)=> openPopup()));
+document.querySelectorAll('button[data-action="openPool"]').forEach(b=> b.addEventListener('click', (e)=> openPopup()));
+document.getElementById('openStakeAll')?.addEventListener('click', ()=> openPopup());
+document.getElementById('openUnstakeAll')?.addEventListener('click', ()=> openPopup());
+</script>
+
+<!-- ------------------ THEME TOGGLE + PROFILE MENU + EXPORT CSV ------------------ -->
+<script>
+const popupRoot = document.getElementById('popup');
+const popupBackdrop = popupRoot.querySelector('.popup-backdrop');
+const popupCloseBtn = document.getElementById('popupCloseBtn');
+const popupNotifyBtn = document.getElementById('popupNotify');
+
+function playOpenSound(){
+  try{
+    // simple WebAudio beep
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type='sine';
+    o.frequency.value = 880;
+    g.gain.value = 0.0001;
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.start();
+    // ramp up and down for a pleasant click
+    g.gain.exponentialRampToValueAtTime(0.08, ctx.currentTime + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
+    setTimeout(()=>{ o.stop(); ctx.close(); }, 220);
+  }catch(e){ /* ignore if audio blocked */ }
+}
+
+function openPopup(){
+  popupRoot.classList.add('open');
+  popupRoot.setAttribute('aria-hidden','false');
+  document.body.classList.add('popup-open');
+  playOpenSound();
+}
+function closePopup(){
+  popupRoot.classList.remove('open');
+  popupRoot.setAttribute('aria-hidden','true');
+  document.body.classList.remove('popup-open');
+}
+
+popupBackdrop.addEventListener('click', closePopup);
+popupCloseBtn.addEventListener('click', closePopup);
+popupNotifyBtn.addEventListener('click', ()=>{
+  closePopup();
+  // tiny feedback
+  alert('You will be notified (demo).');
+});
+
+
+// Export CSV withdraws (kept)
+document.getElementById('exportCsv')?.addEventListener('click', ()=>{
+  const rows = [['Week','Amount','Time'], ...withdrawData.map(w=>[w.week,w.amount,w.time||''])];
+  const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='withdraw_history.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+});
+</script>
+
+<!-- ------------------ LIGHT / DARK THEME SWITCH ------------------ -->
+<script>
+const themeToggle = document.getElementById('themeToggle');
+const themeLabel = document.getElementById('themeLabel');
+
+function getSavedTheme(){ try{ return localStorage.getItem('cryptostake-theme'); }catch(e){ return null; } }
+function saveTheme(t){ try{ localStorage.setItem('cryptostake-theme', t); }catch(e){} }
+
+function applyTheme(t){
+  if(t==='light'){ document.body.classList.add('light-mode'); themeLabel.innerText='Light'; }
+  else { document.body.classList.remove('light-mode'); themeLabel.innerText='Dark'; }
+}
+
+const saved = getSavedTheme();
+applyTheme(saved || 'dark');
+
+themeToggle.addEventListener('click', ()=>{
+  const isLight = document.body.classList.contains('light-mode');
+  const next = isLight ? 'dark' : 'light';
+  applyTheme(next);
+  saveTheme(next);
+});
+themeToggle.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') themeToggle.click(); });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/fontawesome.min.js" integrity="sha512-c41hNYfKMuxafVVmh5X3N/8DiGFFAV/tU2oeNk+upk/dfDAdcbx5FrjFOkFhe4MOLaKlujjkyR4Yn7vImrXjzQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/solid.min.js" integrity="sha512-apZ8JDL5kA1iqvafDdTymV4FWUlJd8022mh46oEMMd/LokNx9uVAzhHk5gRll+JBE6h0alB2Upd3m+ZDAofbaQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/regular.min.js" integrity="sha512-RNA9D6w1BGWFIVSGkGBsEEgVxoGNu7mtLZ+QQvwvoZHJHyoK19FF5R4xeM4AmdzreiwRzu8r0Xs89kFrOPh2zw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/v4-shims.min.js" integrity="sha512-jwXCc38I7s9ikGI6qbqIcktgJDVVppplsNQ5DgW7VbUZCVvdo31qQnpgiU7aDQRa3pETbn9LPnOo97r4Id5/cg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/brands.min.js" integrity="sha512-KYlRezs7yAa59UnX6zAvY7I96Te02kycQn02Sr6FU/fBpxcXAwumRe5DHVrqVnWTt9HY/PktrAPZzSe9UE1Yxg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" integrity="sha512-fD9DI5bZwQxOi7MhYWnnNPlvXdp/2Pj3XSTRrFs5FQa4mizyGLnJcN6tuvUS6LbmgN1ut+XGSABKvjN0H6Aoow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/conflict-detection.min.js" integrity="sha512-Xmx4mYaVSbyVq8IV38jkKf2OZzXfoWTb1i8wYcAVSrNSIDBs7ZgGQzXiNv4Q6PZIO2maDXRjCTs5yaQpVMDs+A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</body>
+</html>

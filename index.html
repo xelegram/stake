@@ -1,0 +1,815 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CryptoStake — Earn & Withdraw</title>
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- AOS for animations -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Alpine for interactivity -->
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    /* custom styles */
+    :root{--grad1:#4f46e5;--grad2:#06b6d4}
+    body { background: radial-gradient(ellipse at top, #030312 0%, #000005 70%); }
+    .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(8px); }
+    .card { border: 1px solid rgba(255,255,255,0.04); }
+    .notif-top { position: fixed; right: 20px; top: 20px; z-index: 60; display:flex; flex-direction:column; gap:10px; }
+    .crypto-icon { width:44px; height:44px; }
+    .gradient-btn{ background: linear-gradient(90deg,var(--grad1),var(--grad2)); }
+    .small-muted{ color:rgba(203,213,225,0.6); }
+
+    /* notification */
+    .notification {
+        background: linear-gradient(135deg, rgba(40, 90, 255, 0.35), rgba(120, 60, 255, 0.35));
+        backdrop-filter: blur(12px);
+        padding: 14px 20px;
+        border-radius: 14px;
+        color: #e4eaff;
+        font-size: 14px;
+        border: 1px solid rgba(90, 130, 255, 0.4);
+        box-shadow: 0 0 15px rgba(80, 130, 255, 0.5);
+        animation: fadeIn 0.5s ease;
+    }
+    .notification .amount{ color:#3BFF6B; font-weight:700; }
+    @keyframes fadeIn { from {opacity: 0; transform: translateY(-10px);} to {opacity: 1; transform: translateY(0);} }
+
+    /* slider styles */
+    #rangeAmt{ -webkit-appearance:none; appearance:none; height:10px; border-radius:10px; background: linear-gradient(90deg,#20ff80,#10c070); outline:none; }
+    #rangeAmt::-webkit-slider-thumb{ -webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:#fff; border:3px solid #20ff80; box-shadow:0 0 8px rgba(32,255,128,0.6); }
+    #rangeAmt::-moz-range-thumb{ width:18px; height:18px; border-radius:50%; background:#fff; border:3px solid #20ff80; box-shadow:0 0 8px rgba(32,255,128,0.6); }
+
+    /* new-premium-noti kept for compatibility (thin variant) */
+    .new-premium-noti{ display:none; }
+  
+  
+  
+/* === PROMO BANNER MAIN === */
+.promo-banner {
+  background: linear-gradient(95deg, #1472ff26, #33f3ff00, #12e4d1);
+  padding: 22px 26px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 0 40px rgba(0,255,190,0.35);
+  animation: bannerFade 0.6s ease-out, pulseGlow 3.4s infinite ease-in-out;
+  z-index: 50;
+  transition: all .4s ease;
+}
+
+@keyframes bannerFade {
+  from { opacity: 0; transform: translateY(-22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* === Glow Breath Animation === */
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 22px rgba(0,255,190,0.25), 0 0 40px rgba(0,255,190,0.10); }
+  50% { box-shadow: 0 0 40px rgba(0,255,190,0.40), 0 0 70px rgba(0,255,190,0.25); }
+  100% { box-shadow: 0 0 22px rgba(0,255,190,0.25), 0 0 40px rgba(0,255,190,0.10); }
+}
+
+/* === Hover Glow Strong === */
+.promo-banner:hover {
+  box-shadow: 0 0 60px #12e4d1, 0 0 120px rgba(0,255,190,0.6);
+  transition: 0.25s ease;
+}
+
+/* === MINIMIZED MODE (Bubble Widget) === */
+.promo-banner.minimized {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  padding: 0;
+  cursor: pointer;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 99999;
+  animation: pulseGlow 2.2s infinite ease-in-out, bubbleFloat 4s infinite ease-in-out;
+}
+
+/* Bubble float motion */
+@keyframes bubbleFloat {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+}
+
+/* Hide content except coin when minimized */
+.promo-banner.minimized .promo-toggle,
+.promo-banner.minimized .max-w-6xl,
+.promo-banner.minimized .promo-particles {
+  display: none !important;
+}
+
+/* === Toggle Button === */
+.promo-toggle {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: rgba(0,0,0,0.25);
+  border-radius: 8px;
+  padding: 4px 9px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #fff;
+  transition: .3s;
+}
+.promo-toggle:hover {
+  background: rgba(0,0,0,0.45);
+}
+
+/* === COIN 3D — NOW WITH VIBRATION + GLOW + SHINE === */
+#promoIcon {
+  width: 60%;
+  height: 60%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.promo-banner.minimized #promoIcon {
+  display: flex !important;
+}
+
+.coin3d {
+  width: 60px;
+  height: 60px;
+
+  animation: 
+      spinCoin 3.5s infinite linear,
+      coinVibrate 1.7s infinite ease-in-out,
+      coinShimmer 4s infinite ease-in-out;
+
+  transform-style: preserve-3d;
+
+  filter: 
+      drop-shadow(0 0 12px #12e4d1)
+      drop-shadow(0 0 25px rgba(0,255,190,0.6));
+}
+
+/* Spin Animation */
+@keyframes spinCoin {
+  from { transform: rotateY(0deg); }
+  to   { transform: rotateY(360deg); }
+}
+
+/* Vibration soft */
+@keyframes coinVibrate {
+  0% { transform: translateX(0) rotateY(0deg); }
+  50% { transform: translateX(1.5px) rotateY(2deg); }
+  100% { transform: translateX(0) rotateY(0deg); }
+}
+
+/* Shine — Reflejo animado */
+@keyframes coinShimmer {
+  0% { filter: drop-shadow(0 0 12px #12e4d1); }
+  50% { filter: drop-shadow(0 0 20px #12e4d1) brightness(1.2); }
+  100% { filter: drop-shadow(0 0 12px #12e4d1); }
+}
+
+/* === PARTICLES BACKGROUND === */
+.promo-particles {
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+  z-index:-1;
+}
+
+.particle {
+  position:absolute;
+  width:6px;
+  height:6px;
+  background:rgba(255,255,255,0.8);
+  border-radius:50%;
+  filter:blur(1px);
+  animation: rise 6s linear infinite;
+}
+
+@keyframes rise {
+  0%   { transform: translateY(40px) scale(0.4); opacity: .7; }
+  100% { transform: translateY(-140px) scale(1); opacity: 0; }
+}
+
+/* === CTAS === */
+.desktop-cta { display:block; }
+.mobile-cta { display:none; }
+
+@media (max-width:768px) {
+  .desktop-cta { display:none !important; }
+  .mobile-cta {
+    display:inline-block !important;
+    background:#000;
+    color:#00ff9c;
+    padding:14px 28px;
+    border-radius:12px;
+    font-size:1.1rem;
+    font-weight:800;
+    box-shadow:0 0 14px rgba(0,255,160,0.7);
+    animation: floatMobile 2s infinite ease-in-out;
+  }
+}
+
+@keyframes floatMobile {
+  0%{ transform:translateY(0); }
+  50%{ transform:translateY(-8px); }
+  100%{ transform:translateY(0); }
+}
+
+/* === Main Text & Progress === */
+.promo-banner h2 {
+  font-size:1.45rem;
+  font-weight:900;
+}
+
+.highlight {
+  color:#00ff6e;
+  text-shadow:0 0 10px rgba(0,255,120,0.9);
+}
+
+.promo-claimed {
+  font-size: 0.84rem;
+  font-weight:600;
+  margin-top: 4px;
+}
+
+.promo-progress {
+  margin-top: 12px;
+  height: 8px;
+  width: 160px;
+  background: rgba(0,0,0,0.25);
+  border-radius:20px;
+  overflow:hidden;
+}
+.promo-progress-fill {
+  height:100%;
+  width:0%;
+  background: linear-gradient(90deg,#00ff8c,#00ffe0);
+  animation: fillBar 3s forwards ease-out;
+}
+
+@keyframes fillBar {
+  from{ width:0%; }
+  to  { width:100%; }
+}
+
+/* === Floating Desktop CTA === */
+.promo-btn {
+  position: relative;
+    background: #02171d;
+    color: #00ff6e;
+  padding: 12px 34px;
+  border-radius: 999px;
+  font-weight: 800;
+  display: inline-block;
+  box-shadow: 0 0 15px rgba(0,255,170,0.65);
+  animation: floatBtn 2s ease-in-out infinite;
+  overflow: hidden;
+}
+
+
+@keyframes floatBtn {
+  0%   { transform:translateY(0px); }
+  50%  { transform:translateY(-7px); }
+  100% { transform:translateY(0px); }
+}
+
+.promo-btn::after{
+  content:"";
+  position:absolute;
+  top:0;
+  left:-120%;
+  width:60%;
+  height:100%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.9),transparent);
+  transform:skewX(-20deg);
+  animation:shineMove 2.4s infinite ease-in-out;
+}
+
+@keyframes shineMove {
+  0%{ left:-120%; }
+  60%{ left:160%; }
+  100%{ left:160%; }
+}
+
+/* === FLOATING DRAGGABLE BUBBLE (Independent from banner) === */
+.promo-bubble {
+  position: fixed;
+  top: 90px;
+  left: 20px;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(95deg, #1472ff26, #33f3ff00, #12e4d1);
+  box-shadow: 0 0 25px rgba(0,255,190,0.55);
+  backdrop-filter: blur(12px);
+  display: none; /* hidden unless minimized */
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  z-index: 99999;
+  animation: bubbleFloat 4s infinite ease-in-out;
+}
+
+.promo-bubble:active {
+  cursor: grabbing;
+}
+
+/* Coin inside bubble */
+.promo-bubble .coin3d {
+  width: 60px;
+  height: 60px;
+}
+
+
+
+  </style>
+</head>
+<body class="text-slate-200 font-sans leading-relaxed">
+  <header class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-600 to-teal-400 flex items-center justify-center text-black font-bold">X</div>
+      <div>
+        <h1 class="text-xl font-semibold">CryptoStake</h1>
+        <p class="text-sm small-muted">Earn passive rewards — Cashouts every Friday at 10:00 PM ET</p>
+      </div>
+    </div>
+    <nav class="space-x-4 text-sm">
+      <a href="#stake" class="px-4 py-2">Stake</a>
+      <a href="#how" class="px-4 py-2">How it works</a>
+      <a href="#testimonials" class="px-4 py-2">Withdrawals</a>
+      <a href="#" id="signup" class="px-4 py-2 gradient-btn rounded-full text-black font-semibold">Sign Up</a>
+    </nav>
+  </header>
+  
+  
+<!-- PROMO BANNER -->
+<!-- PREMIUM MINIMIZABLE PROMO BANNER -->
+<!-- DRAGGABLE BUBBLE (SHOWN ONLY WHEN MINIMIZED) -->
+<div id="promoBubble" class="promo-bubble">
+  <svg class="coin3d" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="45" fill="#f9d34a" stroke="#d4a527" stroke-width="6"/>
+    <circle cx="50" cy="50" r="30" fill="#ffe680" stroke="#e6c14a" stroke-width="4"/>
+    <text x="50%" y="56%" text-anchor="middle" fill="#d19a00" font-size="38px" font-weight="900">$</text>
+  </svg>
+</div>
+<div id="promoBanner" class="promo-banner">
+
+  <!-- PARTICLES -->
+  <div class="promo-particles" id="particleContainer"></div>
+
+  <!-- Minimize/Maximize Button -->
+  <div id="promoToggle" class="promo-toggle">–</div>
+
+
+
+  <!-- MAIN CONTENT -->
+  <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+    
+    <div class="text-center md:text-left">
+      <h2>
+        Earn <span class="highlight">$20</span> Instantly — 
+        Plus <span class="highlight">$20</span> Per Friend You Invite!
+      </h2>
+
+      <div id="claimedCounter" class="promo-claimed">
+        124 users claimed today
+      </div>
+
+      <div class="promo-progress">
+        <div class="promo-progress-fill"></div>
+      </div>
+    </div>
+
+    <!-- Desktop CTA -->
+    <a id="signup" href="#signup" class="promo-btn desktop-cta">
+      EARN $20 • SIGN UP
+    </a>
+
+    <!-- Mobile CTA -->
+    <a id="signup" href="#signup" class="mobile-cta">
+      Claim $25 Bonus
+    </a>
+
+  </div>
+</div>
+
+
+
+
+  <main class="max-w-6xl mx-auto px-6">
+    <!-- hero -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center py-12">
+      <div data-aos="fade-up">
+        <h2 class="text-4xl font-extrabold mb-4" style="background:linear-gradient(90deg,var(--grad1),var(--grad2));-webkit-background-clip:text;background-clip:text;color:transparent;">CryptoStake — Simple, Secure, High Liquidity</h2>
+        <p class="text-slate-400 mb-6">Worry of losing trade? We help you financial freedom to maximize you. Our platform has bigger pool to good enough to leverage your capital with 100% winning streak.</p>
+
+        <div class="glass p-6 rounded-xl card w-full md:w-3/4">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm text-slate-400">Estimated APY</div>
+              <div class="text-2xl font-bold">7.09%</div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm text-slate-400">Conversion</div>
+              <div class="font-medium">1 USDT ≈ 0.9709 USDT</div>
+            </div>
+          </div>
+
+          <!-- Integrated Profit Calculator (input + compact slider) -->
+          <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 items-center">
+            <div>
+              <label class="text-sm small-muted">Invest Amount (USD)</label>
+              <div class="mt-2">
+                <input id="investAmt" type="number" value="100" min="100" max="5000000" class="w-full bg-transparent border border-slate-700 rounded-md px-3 py-2 text-white" />
+              </div>
+              <!-- compact gradient slider placed directly under input to appear cohesive -->
+              <div class="mt-3">
+                <input id="rangeAmt" type="range" min="100" max="5000000" value="100" class="w-full h-2 rounded-lg appearance-none cursor-pointer" />
+              </div>
+              <div class="mt-3 text-slate-400 text-sm">Expected Profit (Formula: investment × 20)</div>
+            </div>
+
+            <div class="text-right">
+              <div class="text-sm text-slate-400">Your Estimated Return</div>
+              <div id="expected" class="text-3xl font-bold mt-2">$2,000</div>
+              <div class="mt-4 flex gap-3 justify-end">
+                <button id="stakeNow" class="px-5 py-2 rounded-full bg-amber-500 text-black font-semibold">Stake now</button>
+                <button id="claimNow" class="px-5 py-2 rounded-full border">Claim now</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 text-sm text-slate-400">Stake your BITCOIN, SOLANA, USDT, ETH tokens to receive CRYPTO, and earn weekly rewards. Cashouts processed every Friday starting at 10:00 PM ET.</div>
+
+        <!-- crypto icons like MEXC on hero -->
+        <div class="mt-6 flex items-center gap-3">
+          <img src="./bitcoin.png" alt="BTC" class="crypto-icon"/>
+          <img src="./ethereum.png" alt="ETH" class="crypto-icon"/>
+          <img src="./solana.png" alt="SOL" class="crypto-icon"/>
+          <img src="./tether.png" alt="USDT" class="crypto-icon"/>
+        </div>
+
+      </div>
+
+      <div data-aos="fade-left" class="relative">
+        <!-- compact background like MEXC with pool box -->
+        <div class="glass rounded-xl p-6 card">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm small-muted">Live pool</div>
+              <div class="text-xl font-bold">$30.4M</div>
+            </div>
+            <div class="text-right small-muted">Next cashout: <br>Fri 10:00 PM ET</div>
+          </div>
+
+          <div class="mt-6">
+            <canvas id="miniPoolChart" height="220"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- how it works -->
+    <section id="how" class="py-12" data-aos="fade-up">
+      <h3 class="text-2xl font-bold mb-6">How to participate</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass p-5 rounded-lg">
+          <div class="text-lg font-semibold">1. Stake crypto</div>
+          <p class="text-sm text-slate-400 mt-2">Stake on-chain to mint crypto, which represents your staked crypto.</p>
+        </div>
+        <div class="glass p-5 rounded-lg">
+          <div class="text-lg font-semibold">2. Earn rewards</div>
+          <p class="text-sm text-slate-400 mt-2">Hold crypto and earn weekly rewards automatically calculated by the protocol.</p>
+        </div>
+        <div class="glass p-5 rounded-lg">
+          <div class="text-lg font-semibold">3. Cashout</div>
+          <p class="text-sm text-slate-400 mt-2">Every Friday's will choose 10 participants winner for pool giving up to 5000$ regardless minimum add staking</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- staking progress + testimonials -->
+    <section class="py-12 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+      <div class="glass p-6 rounded-xl">
+        <h4 class="text-lg font-semibold">Staking Progress</h4>
+        <p class="text-sm text-slate-400">Total staked: <span class="font-medium">142,234,567 USDT</span></p>
+        <div class="w-full bg-slate-800 h-3 rounded-full mt-4 overflow-hidden">
+          <div id="progressBar" class="h-3 rounded-full" style="width: 62%; background:linear-gradient(90deg,var(--grad1),var(--grad2));"></div>
+        </div>
+
+        <div class="mt-6">
+          <div class="text-sm text-slate-400">Next cashout</div>
+          <div class="text-xl font-bold" id="countdown">--:--:--</div>
+          <div class="text-xs text-slate-500">Every Friday at 10:00 PM ET</div>
+        </div>
+      </div>
+
+      <div id="testimonials" class="glass p-6 rounded-xl">
+        <div class="flex items-center justify-between">
+          <h4 class="text-lg font-semibold">Weekly payout dividend</h4>
+          <div class="text-sm text-slate-400">Showing recent withdrawals</div>
+        </div>
+
+        <div class="mt-4 space-y-3" x-data="testi()">
+          <template x-for="(w, idx) in weeks" :key="idx">
+            <div class="p-3 rounded-lg bg-slate-900/40 flex items-center justify-between">
+              <div>
+                <div class="text-sm font-medium" x-text="w.week"></div>
+                <div class="text-xs text-slate-400" x-text="w.note"></div>
+              </div>
+              <div class="text-right">
+                <div class="text-lg font-bold" x-text="w.amount"></div>
+                <div class="text-xs text-slate-500" x-text="w.status"></div>
+              </div>
+            </div>
+          </template>
+
+          <div class="mt-4 flex justify-between">
+            <button class="px-4 py-2 rounded-full border">View all</button>
+            <button class="px-4 py-2 rounded-full bg-amber-500 text-black">Request Withdrawal</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="py-12 text-center text-slate-500 text-sm">© 2025 cryptostake — All rights reserved.</footer>
+  </main>
+
+  <!-- top-right notification container -->
+  <div id="notifRoot" class="notif-top"></div>
+
+<script>
+const banner = document.getElementById("promoBanner");
+const toggleBtn = document.getElementById("promoToggle");
+const bubble = document.getElementById("promoBubble");
+
+/* Restore minimized state */
+if (localStorage.getItem("promoMinimized") === "1") {
+  banner.style.display = "none";
+  bubble.style.display = "flex";
+}
+
+/* Minimize / Maximize */
+toggleBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+
+  const minimized = bubble.style.display === "flex";
+
+  if (minimized) {
+    bubble.style.display = "none";
+    banner.style.display = "block";
+    localStorage.setItem("promoMinimized", "0");
+  } else {
+    bubble.style.display = "flex";
+    banner.style.display = "none";
+    localStorage.setItem("promoMinimized", "1");
+  }
+});
+
+/* Clicking bubble restores banner */
+bubble.addEventListener("click", () => {
+  bubble.style.display = "none";
+  banner.style.display = "block";
+  localStorage.setItem("promoMinimized", "0");
+});
+
+/* ========= DRAGGABLE BUBBLE ========= */
+
+let drag = false;
+let offsetX = 0;
+let offsetY = 0;
+
+bubble.addEventListener("mousedown", (e) => {
+  drag = true;
+  offsetX = e.clientX - bubble.offsetLeft;
+  offsetY = e.clientY - bubble.offsetTop;
+  bubble.style.transition = "none";
+  e.preventDefault();
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (!drag) return;
+  bubble.style.left = (e.clientX - offsetX) + "px";
+  bubble.style.top  = (e.clientY - offsetY) + "px";
+});
+
+document.addEventListener("mouseup", () => {
+  drag = false;
+  bubble.style.transition = "all .35s ease";
+  localStorage.setItem("bubbleX", bubble.offsetLeft);
+  localStorage.setItem("bubbleY", bubble.offsetTop);
+});
+
+/* Restore bubble position */
+if (localStorage.getItem("bubbleX")) {
+  bubble.style.left = localStorage.getItem("bubbleX") + "px";
+  bubble.style.top  = localStorage.getItem("bubbleY") + "px";
+}
+
+
+/* Counter */
+function updateClaimed(){
+  const el = document.getElementById("claimedCounter");
+  const num = Math.floor(80 + Math.random() * 160);
+  el.textContent = `${num} users claimed today`;
+}
+updateClaimed();
+setInterval(updateClaimed, 7000);
+
+/* Particle generator */
+const particleContainer = document.getElementById("particleContainer");
+
+function createParticle() {
+  const p = document.createElement("div");
+  p.classList.add("particle");
+  p.style.left = Math.random()*100 + "%";
+  p.style.animationDuration = (4 + Math.random()*3) + "s";
+  p.style.opacity = (0.6 + Math.random()*0.4);
+  particleContainer.appendChild(p);
+  setTimeout(()=> p.remove(), 6000);
+}
+
+setInterval(()=> {
+  for(let i=0; i<12; i++) createParticle();
+}, 1000);
+</script>
+<script src="./signupModal.js"></script>
+
+
+<script>
+    AOS.init();
+
+    // mini pool chart
+    const ctx2 = document.getElementById('miniPoolChart').getContext('2d');
+    new Chart(ctx2, {
+      type: 'bar',
+      data: { labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], datasets:[{label:'Pool inflow', data:[120,180,140,220,260,300,420], barPercentage:0.6}] },
+      options:{plugins:{legend:{display:false}}, maintainAspectRatio:false}
+    });
+
+    // countdown to next Friday 10:00 PM local time
+    function nextFridayAt22() {
+      const now = new Date();
+      const day = now.getDay();
+      const daysUntilFri = (5 - day + 7) % 7 || 7;
+      const next = new Date(now);
+      next.setDate(now.getDate() + daysUntilFri);
+      next.setHours(22,0,0,0);
+      return next;
+    }
+    let target = nextFridayAt22();
+    function updateCountdown(){
+      const now = new Date();
+      if(now > target) target = nextFridayAt22();
+      let diff = Math.max(0, target - now);
+      const hrs = String(Math.floor(diff / (1000*60*60))).padStart(2,'0');
+      diff %= 1000*60*60;
+      const mins = String(Math.floor(diff / (1000*60))).padStart(2,'0');
+      diff %= 1000*60;
+      const secs = String(Math.floor(diff / 1000)).padStart(2,'0');
+      document.getElementById('countdown').innerText = hrs+':'+mins+':'+secs;
+    }
+    setInterval(updateCountdown,1000); updateCountdown();
+
+    // unified profit calculator (input + slider)
+    (function(){
+      const input = document.getElementById('investAmt');
+      const slider = document.getElementById('rangeAmt');
+      const expected = document.getElementById('expected');
+      if(!input || !slider || !expected) return;
+      function update(v){
+        v = Number(v) || 0;
+        if(v < 100) v = 100;
+        if(v > 5000000) v = 5000000;
+        input.value = v;
+        slider.value = v;
+        expected.innerText = '$' + (v * 20).toLocaleString();
+      }
+      input.addEventListener('input', (e)=> update(e.target.value) );
+      slider.addEventListener('input', (e)=> update(e.target.value) );
+      update(Number(input.value) || 100);
+    })();
+
+    // testimonials weeks data (sample)
+    function testi(){
+      return {
+        weeks: [
+          { week:'Week 45', note:'Auto payout', amount:'$1,240.00', status:'Paid Fri 10:05 PM ET' },
+          { week:'Week 44', note:'Manual claim', amount:'$560.50', status:'Paid Fri 10:15 PM ET' },
+          { week:'Week 43', note:'Auto payout', amount:'$3,200.00', status:'Paid Fri 10:03 PM ET' }
+        ]
+      }
+    }
+
+    // rotating card carousel
+    const carousel = document.getElementById('carousel');
+    if(carousel){
+      const sampleCards = [
+        {name:'Alejandro', text:'Received $1,240 this week — instant and smooth.', amt:'$1,240'},
+        {name:'Mia', text:'Weekly payouts are reliable. Love the UX.', amt:'$560'},
+        {name:'Jon', text:'Big pool, low fees — cashed out $3,200.', amt:'$3,200'}
+      ];
+      function renderCarousel(){
+        carousel.innerHTML = '';
+        sampleCards.forEach(c=>{
+          const el = document.createElement('div');
+          el.className = 'min-w-[260px] glass p-4 rounded-xl card';
+          el.innerHTML = `<div class="font-semibold">${c.name}</div><div class="text-slate-400 text-sm mt-2">${c.text}</div><div class="mt-3 font-bold">${c.amt}</div>`;
+          carousel.appendChild(el);
+        });
+      }
+      renderCarousel();
+      let scrollPos = 0;
+      setInterval(()=>{ 
+        scrollPos += 270; 
+        if(scrollPos > carousel.scrollWidth) scrollPos=0; 
+        carousel.scrollTo({ left: scrollPos, behavior: 'smooth' }); 
+      }, 3500);
+    }
+
+    /* ==========================================================
+       PREMIUM NOTIFICATION SYSTEM — FULLY UPDATED
+       ========================================================== */
+
+    const notifRoot = document.getElementById('notifRoot');
+
+    function rand(min,max){ 
+      return Math.floor(Math.random()*(max-min+1))+min; 
+    }
+
+    // Names realistas + censura
+    function randomUser() {
+      const firstNames = [
+        "M","PR","JU","T","EH","B","O","S","El","O",
+        "SoMI","SAtosHI21","Mari","VA","PA","Alnk","MO","Ca","Emma","MsBit"
+      ];
+      const lastInitials = ["R","M","T","A","L","P","G","S","C","D"];
+      
+      const f = firstNames[rand(0, firstNames.length - 1)];
+      const l = lastInitials[rand(0, lastInitials.length - 1)];
+      
+      return `${f} ${l}.***`;
+    }
+
+    // Cryptos disponibles
+    function randomCrypto() {
+      const cryptos = ["BTC", "USDT", "ETH", "SOL"];
+      return cryptos[rand(0, cryptos.length - 1)];
+    }
+
+    function makeNotif(){
+      const amount = rand(50, 12500).toLocaleString();
+      const user = randomUser();
+      const coin = randomCrypto();
+
+      const text = `${user} cashed out $${amount} in ${coin}`;
+
+      const card = document.createElement('div');
+      card.className = 'notification';
+
+      card.innerHTML = `
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="font-semibold">${text}</div>
+            <div class="text-xs small-muted">${new Date().toLocaleTimeString()}</div>
+          </div>
+          <div class="font-bold amount">$${amount}</div>
+        </div>
+      `;
+
+      notifRoot.prepend(card);
+
+      setTimeout(()=>{
+          card.style.opacity='0';
+          setTimeout(()=>card.remove(),700);
+      },6000);
+    }
+
+    // Primera + intervalo
+    setTimeout(()=>makeNotif(), 1200);
+    setInterval(()=>makeNotif(), 14000);
+
+    // demo buttons
+    const stakeNowBtn = document.getElementById('stakeNow');
+    if(stakeNowBtn) stakeNowBtn.addEventListener('click', ()=>alert('Stake flow started — demo. Sign Up or connect your wallet to continue.'));
+    
+    const claimNowBtn = document.getElementById('claimNow');
+    if(claimNowBtn) claimNowBtn.addEventListener('click', ()=>alert('Claim flow started — demo.'));
+</script>
+
+</body>
+</html>
