@@ -705,64 +705,9 @@ Worry of losing trade? We help you financial freedom to maximize you. Our platfo
     $("btnSort").addEventListener("click", sortByApy);
     $("btnSortM").addEventListener("click", sortByApy);
 
-    // -----------------------------
-    // Modal
-    // -----------------------------
-    const modalWrap = $("modalWrap");
-    function openModal(){
-      modalWrap.classList.remove("hidden-soft");
-      modalWrap.setAttribute("aria-hidden", "false");
-      document.body.style.overflow = "hidden";
-      recalc();
-    }
-    function closeModal(){
-      modalWrap.classList.add("hidden-soft");
-      modalWrap.setAttribute("aria-hidden", "true");
-      document.body.style.overflow = "";
-    }
 
-    ["btnStakeTop","btnStakeM","btnStakeHero","btnStakeCard","btnStakeFooter"].forEach(id=>{
-      const el = $(id);
-      if (el) el.addEventListener("click", openModal);
-    });
 
-    $("modalClose").addEventListener("click", closeModal);
-    $("modalBackdrop").addEventListener("click", closeModal);
-    document.addEventListener("keydown", (e)=>{ if(e.key==="Escape") closeModal(); });
 
-    $("modalSimulate").addEventListener("click", ()=>{
-      $("modalSimulate").textContent = "Simulated ✓";
-      setTimeout(()=> $("modalSimulate").textContent = "Simulate tx (UI)", 1200);
-    });
-    $("modalConfirm").addEventListener("click", ()=>{
-      $("modalConfirm").textContent = "Connect backend ✦";
-      setTimeout(()=> $("modalConfirm").textContent = "Confirm (connect backend)", 1200);
-    });
-
-    // other buttons
-    function toast(msg){
-      // simple lightweight toast
-      const t = document.createElement("div");
-      t.className = "fixed right-4 top-4 z-[120] glass rounded-2xl px-4 py-3 text-sm text-white/85 shadow-soft";
-      t.textContent = msg;
-      document.body.appendChild(t);
-      setTimeout(()=>{ t.style.opacity="0"; t.style.transform="translateY(-6px)"; t.style.transition="all .25s ease"; }, 1400);
-      setTimeout(()=> t.remove(), 1750);
-    }
-    $("btnDownload").addEventListener("click", ()=>toast("Download placeholder (UI)"));
-    $("btnDownloadM").addEventListener("click", ()=>toast("Download placeholder (UI)"));
-    $("btnConnect").addEventListener("click", ()=>toast("Wallet connect placeholder (UI)"));
-    $("btnTerms").addEventListener("click", ()=>toast("Terms placeholder"));
-    $("btnPrivacy").addEventListener("click", ()=>toast("Privacy placeholder"));
-
-    // close asset menu if click outside
-    document.addEventListener("click", (e)=>{
-      const menu = $("assetMenu");
-      const btn = $("assetBtn");
-      if (!menu.contains(e.target) && !btn.contains(e.target)){
-        menu.classList.add("hidden-soft");
-      }
-    });
 
     // -----------------------------
     // Init
@@ -776,3 +721,4 @@ Worry of losing trade? We help you financial freedom to maximize you. Our platfo
   </script>
 </body>
 </html>
+
