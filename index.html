@@ -1,1080 +1,778 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CryptoStake — Earn & Withdraw</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CrptoStake.me — Stake smarter</title>
+  <meta name="description" content="CrptoStake.me — modern staking dashboard with a clean calculator, staking options, and premium glass UI." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- AOS for animations -->
-  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Alpine for interactivity -->
-  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <style>
-    /* custom styles */
-    :root{--grad1:#4f46e5;--grad2:#06b6d4}
-    body { background: radial-gradient(ellipse at top, #030312 0%, #000005 70%); }
-    .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(8px); }
-    .card { border: 1px solid rgba(255,255,255,0.04); }
-    
-.notif-top {
-    position: fixed;
-    right: 20px;
-    top: 20px;
-    z-index: 9000;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-    .crypto-icon { width:44px; height:44px; }
-    .gradient-btn{ background: linear-gradient(90deg,var(--grad1),var(--grad2)); }
-    .small-muted{ color:rgba(203,213,225,0.6); }
-
-    /* notification */
-    .notification {
-        background: linear-gradient(135deg, rgba(40, 90, 255, 0.35), rgba(120, 60, 255, 0.35));
-        backdrop-filter: blur(12px);
-        padding: 14px 20px;
-        border-radius: 14px;
-        color: #e4eaff;
-        font-size: 14px;
-        border: 1px solid rgba(90, 130, 255, 0.4);
-        box-shadow: 0 0 15px rgba(80, 130, 255, 0.5);
-        animation: fadeIn 0.5s ease;
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Inter", "ui-sans-serif", "system-ui"] },
+          boxShadow: {
+            soft: "0 20px 60px rgba(0,0,0,.35)",
+          }
+        }
+      }
     }
-    .notification .amount{ color:#3BFF6B; font-weight:700; }
-    @keyframes fadeIn { from {opacity: 0; transform: translateY(-10px);} to {opacity: 1; transform: translateY(0);} }
-
-    /* slider styles */
-    #rangeAmt{ -webkit-appearance:none; appearance:none; height:10px; border-radius:10px; background: linear-gradient(90deg,#20ff80,#10c070); outline:none; }
-    #rangeAmt::-webkit-slider-thumb{ -webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:#fff; border:3px solid #20ff80; box-shadow:0 0 8px rgba(32,255,128,0.6); }
-    #rangeAmt::-moz-range-thumb{ width:18px; height:18px; border-radius:50%; background:#fff; border:3px solid #20ff80; box-shadow:0 0 8px rgba(32,255,128,0.6); }
-
-    /* new-premium-noti kept for compatibility (thin variant) */
-    .new-premium-noti{ display:none; }
-  
-  #login{
-      background: linear-gradient(90deg, #05e72b, var(--grad2));
-  }
-  
-/* === PROMO BANNER MAIN === */
-.promo-banner {
-  background: linear-gradient(95deg, #1472ff26, #33f3ff00, #12e4d1);
-  padding: 22px 26px;
-  color: white;
-  position: relative;
-  overflow: hidden;
-  border-bottom: 1px solid rgba(255,255,255,0.18);
-  box-shadow: 0 0 40px rgba(0,255,190,0.35);
-  animation: bannerFade 0.6s ease-out, pulseGlow 3.4s infinite ease-in-out;
-  z-index: 50;
-  transition: all .4s ease;
-}
-
-@keyframes bannerFade {
-  from { opacity: 0; transform: translateY(-22px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* === Glow Breath Animation === */
-@keyframes pulseGlow {
-  0% { box-shadow: 0 0 22px rgba(0,255,190,0.25), 0 0 40px rgba(0,255,190,0.10); }
-  50% { box-shadow: 0 0 40px rgba(0,255,190,0.40), 0 0 70px rgba(0,255,190,0.25); }
-  100% { box-shadow: 0 0 22px rgba(0,255,190,0.25), 0 0 40px rgba(0,255,190,0.10); }
-}
-
-/* === Hover Glow Strong === */
-.promo-banner:hover {
-  box-shadow: 0 0 60px #12e4d1, 0 0 120px rgba(0,255,190,0.6);
-  transition: 0.25s ease;
-}
-
-/* === MINIMIZED MODE (Bubble Widget) === */
-.promo-banner.minimized {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  padding: 0;
-  cursor: pointer;
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  z-index: 99999;
-  animation: pulseGlow 2.2s infinite ease-in-out, bubbleFloat 4s infinite ease-in-out;
-}
-
-/* Bubble float motion */
-@keyframes bubbleFloat {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-  100% { transform: translateY(0); }
-}
-
-/* Hide content except coin when minimized */
-.promo-banner.minimized .promo-toggle,
-.promo-banner.minimized .max-w-6xl,
-.promo-banner.minimized .promo-particles {
-  display: none !important;
-}
-
-/* === Toggle Button === */
-.promo-toggle {
-  position: absolute;
-  top: 14px;
-  right: 16px;
-  background: rgba(0,0,0,0.25);
-  border-radius: 8px;
-  padding: 4px 9px;
-  cursor: pointer;
-  font-weight: bold;
-  color: #fff;
-  transition: .3s;
-}
-.promo-toggle:hover {
-  background: rgba(0,0,0,0.45);
-}
-
-/* === COIN 3D — NOW WITH VIBRATION + GLOW + SHINE === */
-#promoIcon {
-  width: 60%;
-  height: 60%;
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-
-.promo-banner.minimized #promoIcon {
-  display: flex !important;
-}
-
-.coin3d {
-  width: 60px;
-  height: 60px;
-
-  animation: 
-      spinCoin 3.5s infinite linear,
-      coinVibrate 1.7s infinite ease-in-out,
-      coinShimmer 4s infinite ease-in-out;
-
-  transform-style: preserve-3d;
-
-  filter: 
-      drop-shadow(0 0 12px #12e4d1)
-      drop-shadow(0 0 25px rgba(0,255,190,0.6));
-}
-
-/* Spin Animation */
-@keyframes spinCoin {
-  from { transform: rotateY(0deg); }
-  to   { transform: rotateY(360deg); }
-}
-
-/* Vibration soft */
-@keyframes coinVibrate {
-  0% { transform: translateX(0) rotateY(0deg); }
-  50% { transform: translateX(1.5px) rotateY(2deg); }
-  100% { transform: translateX(0) rotateY(0deg); }
-}
-
-/* Shine — Reflejo animado */
-@keyframes coinShimmer {
-  0% { filter: drop-shadow(0 0 12px #12e4d1); }
-  50% { filter: drop-shadow(0 0 20px #12e4d1) brightness(1.2); }
-  100% { filter: drop-shadow(0 0 12px #12e4d1); }
-}
-
-/* === PARTICLES BACKGROUND === */
-.promo-particles {
-  position:absolute;
-  inset:0;
-  overflow:hidden;
-  z-index:-1;
-}
-
-.particle {
-  position:absolute;
-  width:6px;
-  height:6px;
-  background:rgba(255,255,255,0.8);
-  border-radius:50%;
-  filter:blur(1px);
-  animation: rise 6s linear infinite;
-}
-
-@keyframes rise {
-  0%   { transform: translateY(40px) scale(0.4); opacity: .7; }
-  100% { transform: translateY(-140px) scale(1); opacity: 0; }
-}
-
-/* === CTAS === */
-.desktop-cta { display:block; }
-.mobile-cta { display:none; }
-
-@media (max-width:768px) {
-  .desktop-cta { display:none !important; }
-  .mobile-cta {
-    display:inline-block !important;
-    background:#000;
-    color:#00ff9c;
-    padding:14px 28px;
-    border-radius:12px;
-    font-size:1.1rem;
-    font-weight:800;
-    box-shadow:0 0 14px rgba(0,255,160,0.7);
-    animation: floatMobile 2s infinite ease-in-out;
-  }
-}
-
-@keyframes floatMobile {
-  0%{ transform:translateY(0); }
-  50%{ transform:translateY(-8px); }
-  100%{ transform:translateY(0); }
-}
-
-/* === Main Text & Progress === */
-.promo-banner h2 {
-  font-size:1.45rem;
-  font-weight:900;
-}
-
-.highlight {
-  color:#00ff6e;
-  text-shadow:0 0 10px rgba(0,255,120,0.9);
-}
-
-.promo-claimed {
-  font-size: 0.84rem;
-  font-weight:600;
-  margin-top: 4px;
-}
-
-.promo-progress {
-  margin-top: 12px;
-  height: 8px;
-  width: 160px;
-  background: rgba(0,0,0,0.25);
-  border-radius:20px;
-  overflow:hidden;
-}
-.promo-progress-fill {
-  height:100%;
-  width:0%;
-  background: linear-gradient(90deg,#00ff8c,#00ffe0);
-  animation: fillBar 3s forwards ease-out;
-}
-
-@keyframes fillBar {
-  from{ width:0%; }
-  to  { width:100%; }
-}
-
-/* === Floating Desktop CTA === */
-.promo-btn {
-  position: relative;
-    background: #02171d;
-    color: #00ff6e;
-  padding: 12px 34px;
-  border-radius: 999px;
-  font-weight: 800;
-  display: inline-block;
-  box-shadow: 0 0 15px rgba(0,255,170,0.65);
-  animation: floatBtn 2s ease-in-out infinite;
-  overflow: hidden;
-}
-
-
-@keyframes floatBtn {
-  0%   { transform:translateY(0px); }
-  50%  { transform:translateY(-7px); }
-  100% { transform:translateY(0px); }
-}
-
-.promo-btn::after{
-  content:"";
-  position:absolute;
-  top:0;
-  left:-120%;
-  width:60%;
-  height:100%;
-  background:linear-gradient(100deg,transparent,rgba(255,255,255,.9),transparent);
-  transform:skewX(-20deg);
-  animation:shineMove 2.4s infinite ease-in-out;
-}
-
-@keyframes shineMove {
-  0%{ left:-120%; }
-  60%{ left:160%; }
-  100%{ left:160%; }
-}
-
-/* === FLOATING DRAGGABLE BUBBLE (Independent from banner) === */
-.promo-bubble {
-  position: fixed;
-  top: 90px;
-  left: 20px;
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: linear-gradient(95deg, #1472ff26, #33f3ff00, #12e4d1);
-  box-shadow: 0 0 25px rgba(0,255,190,0.55);
-  backdrop-filter: blur(12px);
-  display: none; /* hidden unless minimized */
-  align-items: center;
-  justify-content: center;
-  cursor: grab;
-  z-index: 99999;
-  animation: bubbleFloat 4s infinite ease-in-out;
-}
-
-.promo-bubble:active {
-  cursor: grabbing;
-}
-
-/* Coin inside bubble */
-.promo-bubble .coin3d {
-  width: 60px;
-  height: 60px;
-}
-
-
-
-
-/* =========================
-   MODERN HEADER (DESKTOP+MOBILE)
-   ========================= */
-:root{
-  --hdr-bg: rgba(6,10,18,0.55);
-  --hdr-border: rgba(255,255,255,0.10);
-  --hdr-glow: rgba(0,255,190,0.18);
-}
-
-.cs-header{
-  position: sticky;
-  top: 0;
-  z-index: 999;
-  backdrop-filter: blur(14px);
-  background: linear-gradient(180deg, rgba(2,6,18,0.65), rgba(2,6,18,0.35));
-  border-bottom: 1px solid var(--hdr-border);
-}
-
-.cs-header::after{
-  content:"";
-  position:absolute;
-  left:0; right:0; bottom:-1px;
-  height:1px;
-  background: linear-gradient(90deg, transparent, rgba(0,255,190,0.55), transparent);
-  opacity:.75;
-  pointer-events:none;
-}
-
-.cs-wrap{
-  max-width: 72rem;
-  margin: 0 auto;
-  padding: 14px 18px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap: 12px;
-}
-
-.cs-brand{
-  display:flex;
-  align-items:center;
-  gap: 12px;
-  min-width: 0;
-}
-
-.cs-mark{
-  width: 40px;
-  height: 40px;
-  border-radius: 14px;
-  background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.25), rgba(255,255,255,0.08) 35%, rgba(255,255,255,0.02));
-  border: 1px solid rgba(255,255,255,0.12);
-  box-shadow: 0 0 18px var(--hdr-glow);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex: 0 0 auto;
-}
-
-.cs-mark span{
-  font-weight: 900;
-  font-size: 14px;
-  color: #00120f;
-  padding: 8px 10px;
-  border-radius: 10px;
-  background: linear-gradient(90deg, var(--grad1), var(--grad2));
-}
-
-.cs-brandText{
-  min-width: 0;
-  line-height: 1.05;
-}
-
-.cs-title{
-  font-size: 18px;
-  font-weight: 900;
-  letter-spacing: .2px;
-  background: linear-gradient(90deg, #8b5cf6, #22d3ee, #00ff9c);
-  -webkit-background-clip:text;
-  background-clip:text;
-  color: transparent;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.cs-sub{
-  margin-top: 3px;
-  font-size: 12px;
-  color: rgba(203,213,225,0.62);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.cs-actions{
-  display:flex;
-  align-items:center;
-  gap: 10px;
-  flex: 0 0 auto;
-}
-
-.cs-nav{
-  display:none;
-  align-items:center;
-  gap: 6px;
-  padding: 6px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-}
-
-.cs-link{
-  font-size: 13px;
-  color: rgba(255,255,255,0.70);
-  padding: 10px 12px;
-  border-radius: 999px;
-  transition: .18s ease;
-}
-.cs-link:hover{
-  background: rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.92);
-}
-
-.cs-btn{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding: 10px 14px;
-  border-radius: 999px;
-  font-weight: 900;
-  font-size: 13px;
-  letter-spacing: .2px;
-  white-space: nowrap;
-  transition: .18s ease;
-}
-
-.cs-btn-login{
-  background: linear-gradient(90deg, #05e72b, var(--grad2));
-  color:#00120f;
-  box-shadow: 0 0 18px rgba(0,255,160,0.20);
-}
-.cs-btn-login:hover{ transform: translateY(-1px); box-shadow: 0 0 24px rgba(0,255,160,0.35); }
-
-.cs-btn-signup{
-  background: linear-gradient(90deg, var(--grad1), var(--grad2));
-  color:#00120f;
-  box-shadow: 0 0 18px rgba(34,211,238,0.18);
-}
-.cs-btn-signup:hover{ transform: translateY(-1px); box-shadow: 0 0 26px rgba(34,211,238,0.30); }
-
-.cs-burger{
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.10);
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  color: rgba(255,255,255,0.90);
-  font-weight: 900;
-}
-
-.cs-burger:active{ transform: scale(0.98); }
-
-/* Mobile menu panel */
-.cs-panel{
-  display:none;
-  padding: 12px 18px 16px;
-  border-top: 1px solid rgba(255,255,255,0.08);
-  background: rgba(2,6,18,0.45);
-  backdrop-filter: blur(14px);
-}
-.cs-panel.open{ display:block; }
-
-.cs-panelGrid{
-  max-width: 72rem;
-  margin: 0 auto;
-  display:grid;
-  gap: 10px;
-}
-
-.cs-panelRow{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.cs-panel a{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.86);
-  font-weight: 800;
-  font-size: 13px;
-}
-.cs-panel a:active{ transform: scale(0.99); }
-
-.cs-panel .cs-panelFull{ grid-column: 1 / -1; }
-
-/* Desktop layout */
-@media (min-width: 900px){
-  .cs-nav{ display:flex; }
-  .cs-burger{ display:none; }
-  .cs-sub{ display:block; }
-}
-@media (max-width: 420px){
-  .cs-mark{ width: 38px; height:38px; border-radius: 12px; }
-  .cs-title{ font-size: 16px; }
-  .cs-btn{ padding: 9px 12px; }
-  .cs-panelRow{ grid-template-columns: 1fr; }
-}
-
+  </script>
+
+  <style>
+    :root{
+      --bg0:#05040a;
+      --bg1:#07061a;
+      --a:#7c3aed;   /* violet */
+      --b:#06b6d4;   /* cyan */
+      --c:#22c55e;   /* green */
+      --glass: rgba(255,255,255,.06);
+      --stroke: rgba(255,255,255,.08);
+    }
+    html,body{height:100%;}
+    body{
+      background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(124,58,237,.35), transparent 60%),
+        radial-gradient(900px 500px at 80% 20%, rgba(6,182,212,.22), transparent 60%),
+        radial-gradient(900px 600px at 50% 120%, rgba(34,197,94,.12), transparent 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+    }
+    .glass{
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .glass-dark{
+      background: linear-gradient(180deg, rgba(0,0,0,.25), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    .ring-glow{
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,.08),
+        0 0 40px rgba(124,58,237,.18),
+        0 0 70px rgba(6,182,212,.12);
+    }
+    .btn{
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      transition: .2s ease;
+    }
+    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.09); }
+    .btn-primary{
+      background: linear-gradient(135deg, rgba(124,58,237,.95), rgba(6,182,212,.9));
+      border: 1px solid rgba(255,255,255,.18);
+      box-shadow: 0 18px 40px rgba(124,58,237,.18);
+    }
+    .btn-primary:hover{ filter: brightness(1.06); transform: translateY(-1px); }
+    .chip{
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.05);
+    }
+    .grid-fade:before{
+      content:"";
+      position:absolute; inset:-1px;
+      background:
+        linear-gradient(to right, rgba(255,255,255,.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,.06) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse at 50% 20%, black 0%, transparent 70%);
+      opacity:.25;
+      pointer-events:none;
+    }
+    /* nice range */
+    input[type="range"]{
+      -webkit-appearance:none; appearance:none;
+      height: 8px; border-radius: 999px;
+      background: rgba(255,255,255,.10);
+      outline:none;
+    }
+    input[type="range"]::-webkit-slider-thumb{
+      -webkit-appearance:none; appearance:none;
+      width: 18px; height:18px; border-radius:999px;
+      background: white;
+      border: 3px solid rgba(124,58,237,.85);
+      box-shadow: 0 8px 18px rgba(0,0,0,.35);
+      cursor:pointer;
+    }
+    /* modal */
+    .modal-backdrop{ background: rgba(0,0,0,.55); backdrop-filter: blur(6px); }
+    .hidden-soft{ display:none; }
   </style>
 </head>
-<body class="text-slate-200 font-sans leading-relaxed">
-<header class="cs-header">
-  <div class="cs-wrap">
 
-    <!-- Brand -->
-    <div class="cs-brand">
-      <div class="cs-mark" aria-hidden="true"><span>CS</span></div>
-
-      <div class="cs-brandText">
-        <div class="cs-title">CryptoStake</div>
-        <div class="cs-sub">Earn passive rewards — Cashouts every Friday at 10:00 PM ET</div>
-      </div>
-    </div>
-
-    <!-- Actions -->
-    <div class="cs-actions">
-
-      <!-- Desktop nav -->
-      <nav class="cs-nav" aria-label="Primary">
-        <a class="cs-link" href="#stake">Stake</a>
-        <a class="cs-link" href="#how">How it works</a>
-        <a class="cs-link" href="#testimonials">Withdrawals</a>
-      </nav>
-
-      <!-- Desktop buttons (NO IDs here to avoid duplicates) -->
-      <a href="#" data-login class="cs-btn cs-btn-login">Log In</a>
-      <a href="#" data-signup class="cs-btn cs-btn-signup">Sign Up</a>
-
-      <!-- Mobile burger -->
-      <button id="csBurger" class="cs-burger" type="button" aria-label="Open menu" aria-expanded="false">
-        ☰
-      </button>
-    </div>
+<body class="text-white font-sans selection:bg-white/20">
+  <!-- Top ambient grid -->
+  <div class="pointer-events-none fixed inset-0 opacity-70">
+    <div class="grid-fade absolute inset-0"></div>
   </div>
 
-  <!-- Mobile panel (IDs ONLY HERE to trigger your modals) -->
-  <div id="csPanel" class="cs-panel" aria-label="Mobile menu">
-    <div class="cs-panelGrid">
-      <div class="cs-panelRow">
-        <a href="#stake">Stake</a>
-        <a href="#how">How it works</a>
+  <!-- Header -->
+  <header class="sticky top-0 z-50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mt-4 glass rounded-2xl ring-glow">
+        <div class="flex items-center justify-between px-4 sm:px-6 py-3">
+          <!-- Brand -->
+          <a href="#" class="flex items-center gap-3">
+            <div class="h-10 w-10 rounded-2xl glass-dark flex items-center justify-center">
+              <!-- simple mark -->
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2l8 5v10l-8 5-8-5V7l8-5Z" stroke="rgba(255,255,255,.85)" stroke-width="1.6"/>
+                <path d="M7.5 9.2 12 12l4.5-2.8" stroke="rgba(6,182,212,.9)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 12v6.6" stroke="rgba(124,58,237,.95)" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="leading-tight">
+              <div class="text-lg font-extrabold tracking-tight">CrptoStake<span class="text-white/60">.me</span></div>
+              <div class="text-xs text-white/55 -mt-0.5">stake • earn • chill</div>
+            </div>
+          </a>
+
+          <!-- Desktop nav -->
+          <nav class="hidden md:flex items-center gap-6 text-sm text-white/75">
+            <a class="hover:text-white transition" href="#calculator">Calculator</a>
+            <a class="hover:text-white transition" href="#options">Options</a>
+            <a class="hover:text-white transition" href="#security">Security</a>
+            <a class="hover:text-white transition" href="#faq">FAQ</a>
+          </nav>
+
+          <!-- Actions -->
+          <div class="hidden md:flex items-center gap-3">
+            <button class="btn rounded-xl px-4 py-2 text-sm" id="btnDownload">Download app</button>
+            <button class="btn-primary rounded-xl px-5 py-2.5 text-sm font-semibold" id="login">
+              Log In
+            </button>
+            <button class="btn-primary rounded-xl px-5 py-2.5 text-sm font-semibold" id="signup">
+              Sign Up
+            </button>
+          </div>
+
+          <!-- Mobile button -->
+          <button class="md:hidden btn rounded-xl px-3 py-2" id="btnMobile">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M4 7h16M4 12h16M4 17h16" stroke="rgba(255,255,255,.9)" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Mobile nav -->
+        <div class="md:hidden px-4 pb-4 hidden-soft" id="mobileMenu">
+          <div class="h-px bg-white/10 my-2"></div>
+          <div class="flex flex-col gap-2 text-sm text-white/80">
+            <a class="btn rounded-xl px-4 py-2" href="#calculator">Calculator</a>
+            <a class="btn rounded-xl px-4 py-2" href="#options">Options</a>
+            <a class="btn rounded-xl px-4 py-2" href="#security">Security</a>
+            <a class="btn rounded-xl px-4 py-2" href="#faq">FAQ</a>
+            <div class="grid grid-cols-2 gap-2 pt-2">
+              <button class="btn rounded-xl px-4 py-2" id="btnDownloadM">Download</button>
+              <button class="btn-primary rounded-xl px-4 py-2 font-semibold" id="signup">Invest Now</button>
+            </div>
+          </div>
+        </div>
       </div>
-
-      <a class="cs-panelFull" href="#testimonials">Withdrawals</a>
-
-      <a class="cs-panelFull cs-btn cs-btn-login" href="#" id="login">Log In</a>
-      <a class="cs-panelFull cs-btn cs-btn-signup" href="#" id="signup">Sign Up</a>
     </div>
-  </div>
-</header>
+  </header>
 
-  
-  
-<!-- PROMO BANNER -->
-<!-- PREMIUM MINIMIZABLE PROMO BANNER -->
-<!-- DRAGGABLE BUBBLE (SHOWN ONLY WHEN MINIMIZED) -->
-<div id="promoBubble" class="promo-bubble">
-  <svg class="coin3d" viewBox="0 0 100 100">
-    <circle cx="50" cy="50" r="45" fill="#f9d34a" stroke="#d4a527" stroke-width="6"/>
-    <circle cx="50" cy="50" r="30" fill="#ffe680" stroke="#e6c14a" stroke-width="4"/>
-    <text x="50%" y="56%" text-anchor="middle" fill="#d19a00" font-size="38px" font-weight="900">$</text>
-  </svg>
-</div>
-<div id="promoBanner" class="promo-banner">
-
-  <!-- PARTICLES -->
-  <div class="promo-particles" id="particleContainer"></div>
-
-  <!-- Minimize/Maximize Button -->
-  <div id="promoToggle" class="promo-toggle">–</div>
-
-
-
-  <!-- MAIN CONTENT -->
-  <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-    
-    <div class="text-center md:text-left">
-      <h2>
-        Earn <span class="highlight">$20</span> Instantly — 
-        Plus <span class="highlight">$20</span> Per Friend You Invite!
-      </h2>
-
-      <div id="claimedCounter" class="promo-claimed">
-        124 users claimed today
-      </div>
-
-      <div class="promo-progress">
-        <div class="promo-progress-fill"></div>
-      </div>
-    </div>
-
-    <!-- Desktop CTA -->
-    <a id="signup" href="#signup" class="promo-btn desktop-cta">
-      EARN $20 • SIGN UP
-    </a>
-
-    <!-- Mobile CTA -->
-    <a id="signup" href="#signup" class="mobile-cta">
-      Claim $25 Bonus
-    </a>
-
-  </div>
-</div>
-
-
-
-
-  <main class="max-w-6xl mx-auto px-6">
-    <!-- hero -->
-    <section class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center py-12">
-      <div data-aos="fade-up">
-        <h2 class="text-4xl font-extrabold mb-4" style="background:linear-gradient(90deg,var(--grad1),var(--grad2));-webkit-background-clip:text;background-clip:text;color:transparent;">CryptoStake — Simple, Secure, High Liquidity</h2>
-        <p class="text-slate-400 mb-6">Worry of losing trade? We help you financial freedom to maximize you. Our platform has bigger pool to good enough to leverage your capital with 100% winning streak.</p>
-
-        <div class="glass p-6 rounded-xl card w-full md:w-3/4">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="text-sm text-slate-400">Estimated APY</div>
-              <div class="text-2xl font-bold">7.09%</div>
-            </div>
-            <div class="text-right">
-              <div class="text-sm text-slate-400">Conversion</div>
-              <div class="font-medium">1 USDT ≈ 0.9709 USDT</div>
-            </div>
+  <!-- Hero -->
+  <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section class="pt-10 sm:pt-14 pb-10">
+      <div class="grid lg:grid-cols-12 gap-8 items-center">
+        <div class="lg:col-span-7">
+          <div class="inline-flex items-center gap-2 chip rounded-full px-3 py-1 text-xs text-white/80">
+            <span class="inline-block h-2 w-2 rounded-full" style="background: rgba(34,197,94,.9)"></span>
+            Live rates • earning
           </div>
 
-          <!-- Integrated Profit Calculator (input + compact slider) -->
-          <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 items-center">
-            <div>
-              <label class="text-sm small-muted">Invest Amount (USD)</label>
-              <div class="mt-2">
-                <input id="investAmt" type="number" value="100" min="100" max="5000000" class="w-full bg-transparent border border-slate-700 rounded-md px-3 py-2 text-white" />
-              </div>
-              <!-- compact gradient slider placed directly under input to appear cohesive -->
-              <div class="mt-3">
-                <input id="rangeAmt" type="range" min="100" max="5000000" value="100" class="w-full h-2 rounded-lg appearance-none cursor-pointer" />
-              </div>
-              <div class="mt-3 text-slate-400 text-sm">Expected Profit (Formula: investment × 20)</div>
-            </div>
+          <h1 class="mt-5 text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight">
+            Investing in crypto and
+            <span class="bg-clip-text text-transparent"
+              style="background-image: linear-gradient(135deg, rgba(124,58,237,1), rgba(6,182,212,1));">
+              Double your earnings
+            </span>
+          </h1>
 
-            <div class="text-right">
-              <div class="text-sm text-slate-400">Your Estimated Return</div>
-              <div id="expected" class="text-3xl font-bold mt-2">$2,000</div>
-              <div class="mt-4 flex gap-3 justify-end">
-                <button id="stakeNow" class="px-5 py-2 rounded-full bg-amber-500 text-black font-semibold">Stake now</button>
-                <button id="claimNow" class="px-5 py-2 rounded-full border">Claim now</button>
-              </div>
+          <p class="mt-4 text-white/70 max-w-2xl">
+Worry of losing trade? We help you financial freedom to maximize you. Our platform has bigger pool to good enough to leverage your capital with 100% winning streak.
+          </p>
+
+          <div class="mt-6 flex flex-col sm:flex-row gap-3">
+            <button class="btn-primary rounded-2xl px-6 py-3 font-semibold" id="signup">
+              Open staking
+            </button>
+            <a href="#options" class="btn rounded-2xl px-6 py-3 font-semibold text-center">
+              Download app
+            </a>
+          </div>
+
+          <div class="mt-8 grid grid-cols-3 gap-3 sm:gap-4 max-w-xl">
+            <div class="glass rounded-2xl p-4">
+              <div class="text-2xl font-extrabold" id="statStakers">1,420+</div>
+              <div class="text-xs text-white/60 mt-1">Stakers</div>
+            </div>
+            <div class="glass rounded-2xl p-4">
+              <div class="text-2xl font-extrabold" id="statStaked">$72.8M</div>
+              <div class="text-xs text-white/60 mt-1">Total staked</div>
+            </div>
+            <div class="glass rounded-2xl p-4">
+              <div class="text-2xl font-extrabold" id="statPaid">$4.9M</div>
+              <div class="text-xs text-white/60 mt-1">Rewards paid</div>
             </div>
           </div>
         </div>
 
-        <div class="mt-6 text-sm text-slate-400">Stake your BITCOIN, SOLANA, USDT, ETH tokens to receive CRYPTO, and earn weekly rewards. Cashouts processed every Friday starting at 10:00 PM ET.</div>
-
-        <!-- crypto icons like MEXC on hero -->
-        <div class="mt-6 flex items-center gap-3">
-          <img src="./bitcoin.png" alt="BTC" class="crypto-icon"/>
-          <img src="./ethereum.png" alt="ETH" class="crypto-icon"/>
-          <img src="./solana.png" alt="SOL" class="crypto-icon"/>
-          <img src="./tether.png" alt="USDT" class="crypto-icon"/>
-        </div>
-
-      </div>
-
-      <div data-aos="fade-left" class="relative">
-        <!-- compact background like MEXC with pool box -->
-        <div class="glass rounded-xl p-6 card">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="text-sm small-muted">Live pool</div>
-              <div class="text-xl font-bold">$30.4M</div>
-            </div>
-            <div class="text-right small-muted">Next cashout: <br>Fri 10:00 PM ET</div>
-          </div>
-
-          <div class="mt-6">
-            <canvas id="miniPoolChart" height="220"></canvas>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- how it works -->
-    <section id="how" class="py-12" data-aos="fade-up">
-      <h3 class="text-2xl font-bold mb-6">How to participate</h3>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="glass p-5 rounded-lg">
-          <div class="text-lg font-semibold">1. Stake crypto</div>
-          <p class="text-sm text-slate-400 mt-2">Stake on-chain to mint crypto, which represents your staked crypto.</p>
-        </div>
-        <div class="glass p-5 rounded-lg">
-          <div class="text-lg font-semibold">2. Earn rewards</div>
-          <p class="text-sm text-slate-400 mt-2">Hold crypto and earn weekly rewards automatically calculated by the protocol.</p>
-        </div>
-        <div class="glass p-5 rounded-lg">
-          <div class="text-lg font-semibold">3. Cashout</div>
-          <p class="text-sm text-slate-400 mt-2">Every Friday's will choose 10 participants winner for pool giving up to 5000$ regardless minimum add staking</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- staking progress + testimonials -->
-    <section class="py-12 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-      <div class="glass p-6 rounded-xl">
-        <h4 class="text-lg font-semibold">Staking Progress</h4>
-        <p class="text-sm text-slate-400">Total staked: <span class="font-medium">142,234,567 USDT</span></p>
-        <div class="w-full bg-slate-800 h-3 rounded-full mt-4 overflow-hidden">
-          <div id="progressBar" class="h-3 rounded-full" style="width: 62%; background:linear-gradient(90deg,var(--grad1),var(--grad2));"></div>
-        </div>
-
-        <div class="mt-6">
-          <div class="text-sm text-slate-400">Next cashout</div>
-          <div class="text-xl font-bold" id="countdown">--:--:--</div>
-          <div class="text-xs text-slate-500">Every Friday at 10:00 PM ET</div>
-        </div>
-      </div>
-
-      <div id="testimonials" class="glass p-6 rounded-xl">
-        <div class="flex items-center justify-between">
-          <h4 class="text-lg font-semibold">Weekly payout dividend</h4>
-          <div class="text-sm text-slate-400">Showing recent withdrawals</div>
-        </div>
-
-        <div class="mt-4 space-y-3" x-data="testi()">
-          <template x-for="(w, idx) in weeks" :key="idx">
-            <div class="p-3 rounded-lg bg-slate-900/40 flex items-center justify-between">
+        <!-- Calculator card -->
+        <div class="lg:col-span-5" id="calculator">
+          <div class="glass rounded-3xl p-5 sm:p-6 shadow-soft ring-glow">
+            <div class="flex items-start justify-between gap-4">
               <div>
-                <div class="text-sm font-medium" x-text="w.week"></div>
-                <div class="text-xs text-slate-400" x-text="w.note"></div>
+                <div class="text-sm text-white/70">Staking calculator</div>
+                <div class="text-xl font-bold mt-1" id="calcTitle">Ethereum (ETH)</div>
               </div>
-              <div class="text-right">
-                <div class="text-lg font-bold" x-text="w.amount"></div>
-                <div class="text-xs text-slate-500" x-text="w.status"></div>
+
+              <button class="chip rounded-xl px-3 py-2 text-sm flex items-center gap-2" id="assetBtn">
+                <span class="h-2.5 w-2.5 rounded-full" id="assetDot" style="background: rgba(6,182,212,.95)"></span>
+                <span id="assetTicker">ETH</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M6 9l6 6 6-6" stroke="rgba(255,255,255,.85)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Asset dropdown -->
+            <div class="mt-3 hidden-soft" id="assetMenu">
+              <div class="glass-dark rounded-2xl p-2 grid gap-1 text-sm">
+                <!-- filled by JS -->
               </div>
             </div>
-          </template>
 
-          <div class="mt-4 flex justify-between">
-            <button class="px-4 py-2 rounded-full border">View all</button>
-            <button class="px-4 py-2 rounded-full bg-amber-500 text-black">Request Withdrawal</button>
+            <div class="mt-5 grid grid-cols-2 gap-3">
+              <div class="glass-dark rounded-2xl p-4">
+                <div class="text-xs text-white/60">Amount</div>
+                <div class="mt-1 flex items-baseline gap-2">
+                  <input id="amountInput" type="number" min="0" step="0.01"
+                    class="w-full bg-transparent outline-none text-2xl font-extrabold"
+                    value="2" />
+                  <div class="text-sm text-white/60" id="amountTicker">ETH</div>
+                </div>
+              </div>
+              <div class="glass-dark rounded-2xl p-4">
+                <div class="text-xs text-white/60">Est. value</div>
+                <div class="mt-1 text-2xl font-extrabold" id="usdValue">$0</div>
+                <div class="text-xs text-white/50 mt-1">Indicative only</div>
+              </div>
+            </div>
+
+            <div class="mt-4 glass-dark rounded-2xl p-4">
+              <div class="flex items-center justify-between text-xs text-white/60">
+                <span>Lock period</span>
+                <span class="text-white/80 font-semibold" id="lockLabel">30 days</span>
+              </div>
+              <input id="lockRange" class="mt-3 w-full" type="range" min="7" max="180" value="30" />
+              <div class="mt-2 flex items-center justify-between text-[11px] text-white/45">
+                <span>7d</span><span>90d</span><span>180d</span>
+              </div>
+            </div>
+
+            <div class="mt-4 grid grid-cols-2 gap-3">
+              <div class="glass-dark rounded-2xl p-4">
+                <div class="text-xs text-white/60">APY</div>
+                <div class="mt-1 text-2xl font-extrabold"><span id="apyValue">4.60</span>%</div>
+                <div class="text-xs text-white/50 mt-1" id="apyHint">Varies with lock</div>
+              </div>
+              <div class="glass-dark rounded-2xl p-4">
+                <div class="text-xs text-white/60">Est. reward</div>
+                <div class="mt-1 text-2xl font-extrabold" id="rewardValue">0.00</div>
+                <div class="text-xs text-white/50 mt-1" id="rewardSub">per lock period</div>
+              </div>
+            </div>
+
+            <button class="mt-5 w-full btn-primary rounded-2xl py-3 font-semibold" id="signup">
+              Stake now
+            </button>
+
+            <div class="mt-3 text-xs text-white/50 leading-relaxed">
+              Calculate your estimated earnings
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <footer class="py-12 text-center text-slate-500 text-sm">© 2025 cryptostake — All rights reserved.</footer>
+    <!-- Options -->
+    <section id="options" class="pb-14">
+      <div class="flex items-end justify-between gap-4">
+        <div>
+          <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Staking options</h2>
+          <p class="mt-2 text-white/65 max-w-2xl">
+          </p>
+        </div>
+        <div class="hidden sm:flex gap-2">
+          <button class="btn rounded-xl px-4 py-2 text-sm" id="btnShuffle">Shuffle rates</button>
+          <button class="btn rounded-xl px-4 py-2 text-sm" id="btnSort">Sort by APY</button>
+        </div>
+      </div>
+
+      <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4" id="optionsGrid">
+        <!-- Cards by JS -->
+      </div>
+
+      <div class="mt-5 sm:hidden grid grid-cols-2 gap-2">
+        <button class="btn rounded-xl px-4 py-2 text-sm" id="btnShuffleM">Shuffle</button>
+        <button class="btn rounded-xl px-4 py-2 text-sm" id="btnSortM">Sort APY</button>
+      </div>
+    </section>
+
+    <!-- Security / features -->
+    <section id="security" class="pb-14">
+      <div class="glass rounded-3xl p-6 sm:p-8">
+        <div class="grid lg:grid-cols-12 gap-6 items-center">
+          <div class="lg:col-span-7">
+            <h3 class="text-2xl sm:text-3xl font-extrabold">Earn $15 for your first credit card deposit</h3>
+            <p class="mt-2 text-white/65">
+            When you make your first deposit by credit card, we'll give you $15.
+            </p>
+
+            <div class="mt-5 grid sm:grid-cols-2 gap-4">
+              <div class="glass-dark rounded-2xl p-4">
+                <div class="font-semibold">Automatic conversion</div>
+                <div class="text-sm text-white/60 mt-1">Credit card deposits are automatically converted into crypto coin.</div>
+              </div>
+              <div class="glass-dark rounded-2xl p-4">
+                <div class="font-semibold">Earn boost</div>
+                <div class="text-sm text-white/60 mt-1">1% boost to your earnings when you deposit with a credit card.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5">
+            <div class="glass-dark rounded-3xl p-5 ring-glow">
+              <div class="text-sm text-white/70">Quick checklist</div>
+              <ul class="mt-3 space-y-2 text-sm text-white/70">
+                <li class="flex gap-2"><span class="text-white">✓</span> Maximize your profits</li>
+                <li class="flex gap-2"><span class="text-white">✓</span> Long-term investment</li>
+                <li class="flex gap-2"><span class="text-white">✓</span> Receive daily earnings</li>
+                <li class="flex gap-2"><span class="text-white">✓</span> Earn 100% of your capital</li>
+              </ul>
+              <button class="mt-4 w-full btn rounded-2xl py-3 font-semibold" id="btnConnect">
+                Invest Now
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="pb-16">
+      <h3 class="text-2xl sm:text-3xl font-extrabold">FAQ</h3>
+      <div class="mt-5 grid lg:grid-cols-2 gap-4">
+        <details class="glass rounded-2xl p-5">
+          <summary class="cursor-pointer font-semibold">How it works</summary>
+          <p class="mt-2 text-sm text-white/65">
+            Cryptocurrency staking works by locking your tokens on a Proof-of-Stake (PoS) network to help validate transactions and secure the blockchain, acting as a digital "fixed-term deposit," and in return, you receive rewards in the same cryptocurrency, similar to earning interest, allowing your assets to generate passive income while contributing to the security and operability of the network.
+          </p>
+        </details>
+        <details class="glass rounded-2xl p-5">
+          <summary class="cursor-pointer font-semibold">How to invest</summary>
+          <p class="mt-2 text-sm text-white/65">
+            You can invest from your account panel by adding your first deposit with cryptocurrencies or buy cryptocurrencies with credit cards. Your profits will be distributed daily on the dashboard.
+          </p>
+        </details>
+        <details class="glass rounded-2xl p-5">
+          <summary class="cursor-pointer font-semibold">When my earnings are added?</summary>
+          <p class="mt-2 text-sm text-white/65">
+            You can view your daily earnings from the dashboard.
+          </p>
+        </details>
+        <details class="glass rounded-2xl p-5">
+          <summary class="cursor-pointer font-semibold">What are the risks?</summary>
+          <p class="mt-2 text-sm text-white/65">
+            The risk percentage is 0%. Cryptocurrency staking is based on using your crypto to contribute to the cryptocurrency ecosystem and transaction processing. Profits are distributed from these transactions, making it a win-win situation: you help the ecosystem and generate passive income at the same time.
+          </p>
+        </details>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="pb-10">
+      <div class="glass rounded-3xl p-6 flex flex-col sm:flex-row gap-4 items-center justify-between">
+        <div class="text-sm text-white/65">
+          © <span id="year"></span> <span class="font-semibold text-white">CrptoStake.me</span> 
+        </div>
+        <div class="flex gap-2">
+          <button class="btn rounded-xl px-4 py-2 text-sm" id="btnPrivacy">Download App</button>
+          <button class="btn-primary rounded-xl px-4 py-2 text-sm font-semibold" id="signup">Stake now</button>
+        </div>
+      </div>
+    </footer>
   </main>
 
-  <!-- top-right notification container -->
-  <div id="notifRoot" class="notif-top"></div>
+  <!-- Modal -->
+  <div class="fixed inset-0 z-[80] hidden-soft" id="modalWrap" aria-hidden="true">
+    <div class="absolute inset-0 modal-backdrop" id="modalBackdrop"></div>
 
-<script>
-const banner = document.getElementById("promoBanner");
-const toggleBtn = document.getElementById("promoToggle");
-const bubble = document.getElementById("promoBubble");
+    <div class="relative min-h-full flex items-center justify-center p-4">
+      <div class="glass rounded-3xl w-full max-w-lg p-5 sm:p-6 shadow-soft ring-glow">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <div class="text-sm text-white/65">Stake flow</div>
+            <div class="text-2xl font-extrabold mt-1">Stake with CrptoStake.me</div>
+          </div>
+          <button class="btn rounded-xl px-3 py-2" id="modalClose">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M6 6l12 12M18 6l-12 12" stroke="rgba(255,255,255,.9)" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
 
-/* Restore minimized state */
-if (localStorage.getItem("promoMinimized") === "1") {
-  banner.style.display = "none";
-  bubble.style.display = "flex";
-}
+        <div class="mt-4 glass-dark rounded-2xl p-4">
+          <div class="text-sm text-white/70">Selected</div>
+          <div class="mt-1 text-white font-semibold">
+            <span id="modalAsset">ETH</span> • <span id="modalAmount">2</span> • <span id="modalLock">30 days</span>
+          </div>
+          <div class="mt-2 text-sm text-white/60">
+            Est. reward: <span class="text-white font-semibold" id="modalReward">0.00</span>
+          </div>
+        </div>
 
-/* Minimize / Maximize */
-toggleBtn.addEventListener("click", (e) => {
-  e.stopPropagation();
+        <div class="mt-4 grid sm:grid-cols-2 gap-3">
+          <button class="btn rounded-2xl py-3 font-semibold" id="modalSimulate">
+            Simulate tx (UI)
+          </button>
+          <button class="btn-primary rounded-2xl py-3 font-semibold" id="modalConfirm">
+            Confirm (connect backend)
+          </button>
+        </div>
 
-  const minimized = bubble.style.display === "flex";
+        <p class="mt-3 text-xs text-white/50">
+          Hook these buttons to your real wallet connect + staking methods. This is only UI behavior.
+        </p>
+      </div>
+    </div>
+  </div>
 
-  if (minimized) {
-    bubble.style.display = "none";
-    banner.style.display = "block";
-    localStorage.setItem("promoMinimized", "0");
-  } else {
-    bubble.style.display = "flex";
-    banner.style.display = "none";
-    localStorage.setItem("promoMinimized", "1");
-  }
-});
-
-/* Clicking bubble restores banner */
-bubble.addEventListener("click", () => {
-  bubble.style.display = "none";
-  banner.style.display = "block";
-  localStorage.setItem("promoMinimized", "0");
-});
-
-/* ========= DRAGGABLE BUBBLE ========= */
-
-let drag = false;
-let offsetX = 0;
-let offsetY = 0;
-
-bubble.addEventListener("mousedown", (e) => {
-  drag = true;
-  offsetX = e.clientX - bubble.offsetLeft;
-  offsetY = e.clientY - bubble.offsetTop;
-  bubble.style.transition = "none";
-  e.preventDefault();
-});
-
-document.addEventListener("mousemove", (e) => {
-  if (!drag) return;
-  bubble.style.left = (e.clientX - offsetX) + "px";
-  bubble.style.top  = (e.clientY - offsetY) + "px";
-});
-
-document.addEventListener("mouseup", () => {
-  drag = false;
-  bubble.style.transition = "all .35s ease";
-  localStorage.setItem("bubbleX", bubble.offsetLeft);
-  localStorage.setItem("bubbleY", bubble.offsetTop);
-});
-
-/* Restore bubble position */
-if (localStorage.getItem("bubbleX")) {
-  bubble.style.left = localStorage.getItem("bubbleX") + "px";
-  bubble.style.top  = localStorage.getItem("bubbleY") + "px";
-}
-
-
-/* Counter */
-function updateClaimed(){
-  const el = document.getElementById("claimedCounter");
-  const num = Math.floor(80 + Math.random() * 160);
-  el.textContent = `${num} users claimed today`;
-}
-updateClaimed();
-setInterval(updateClaimed, 7000);
-
-/* Particle generator */
-const particleContainer = document.getElementById("particleContainer");
-
-function createParticle() {
-  const p = document.createElement("div");
-  p.classList.add("particle");
-  p.style.left = Math.random()*100 + "%";
-  p.style.animationDuration = (4 + Math.random()*3) + "s";
-  p.style.opacity = (0.6 + Math.random()*0.4);
-  particleContainer.appendChild(p);
-  setTimeout(()=> p.remove(), 6000);
-}
-
-setInterval(()=> {
-  for(let i=0; i<12; i++) createParticle();
-}, 1000);
-</script>
 <script src="./signupModal.js"></script>
 <script src="./loginmodal.js"></script>
 
-<script>
-    AOS.init();
+  <script>
+    // -----------------------------
+    // Data (edit freely)
+    // -----------------------------
+    const ASSETS = [
+      { name:"Ethereum", ticker:"ETH", price: 3120, dot:"rgba(6,182,212,.95)", baseApy: 17.6, min: 0.25, lockMin: 7, lockMax: 180 },
+      { name:"USDT", ticker:"trc20", price: 1, dot:"rgba(34,197,94,.9)", baseApy: 20.1, min: 1, lockMin: 7, lockMax: 90 },
+      { name:"Bitcoin", ticker:"BTC", price: 90956.51, dot:"rgba(124,58,237,.95)", baseApy: 15.8, min: 50, lockMin: 7, lockMax: 120 },
+      { name:"Solana", ticker:"SOL", price: 140.63, dot:"rgba(236,72,153,.9)", baseApy: 13.1, min: 20, lockMin: 14, lockMax: 180 },
+      { name:"Litecoin", ticker:"LTC", price: 81.53, dot:"rgba(148,163,184,.9)", baseApy: 16.2, min: 5, lockMin: 14, lockMax: 180 },
+      { name:"TRON", ticker:"TRX", price: 0.29, dot:"rgba(255,255,255,.8)", baseApy: 28.2, min: 10, lockMin: 7, lockMax: 120 },
+    ];
 
-    // mini pool chart
-    const ctx2 = document.getElementById('miniPoolChart').getContext('2d');
-    new Chart(ctx2, {
-      type: 'bar',
-      data: { labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], datasets:[{label:'Pool inflow', data:[120,180,140,220,260,300,420], barPercentage:0.6}] },
-      options:{plugins:{legend:{display:false}}, maintainAspectRatio:false}
+    const OPTIONS = [
+      { name:"Ethereum", ticker:"ETH", apy: 17.6, unstake:"10 days", min:"0.25 ETH", spark:"wavy" },
+      { name:"USDT", ticker:"trc20", apy: 20.1, unstake:"28 days", min:"20 trc20", spark:"spiky" },
+      { name:"Bitcoin", ticker:"BTC", apy: 15.8, unstake:"21 days", min:"5 BTC", spark:"flat" },
+      { name:"Solana", ticker:"SOL", apy: 13.1, unstake:"instant", min:"50 SOL", spark:"wavy2" },
+      { name:"Litecoin", ticker:"LTC", apy: 16.2, unstake:"5 days", min:"1 LTC", spark:"wavefast" },
+      { name:"TRON", ticker:"TRX", apy: 28.2, unstake:"4 days", min:"10 TRX", spark:"spiky2" },
+    ];
+
+    // -----------------------------
+    // Helpers
+    // -----------------------------
+    const $ = (id) => document.getElementById(id);
+    const fmtUSD = (n) => {
+      const v = Number(n || 0);
+      return v.toLocaleString(undefined, { style:"currency", currency:"USD", maximumFractionDigits: 2 });
+    };
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+    const rnd = (a,b) => a + Math.random()*(b-a);
+
+    // -----------------------------
+    // Mobile menu
+    // -----------------------------
+    const mobileBtn = $("btnMobile");
+    const mobileMenu = $("mobileMenu");
+    mobileBtn.addEventListener("click", () => {
+      mobileMenu.classList.toggle("hidden-soft");
+    });
+    // close mobile menu when clicking an anchor
+    mobileMenu.querySelectorAll("a").forEach(a=>{
+      a.addEventListener("click", ()=> mobileMenu.classList.add("hidden-soft"));
     });
 
-    // countdown to next Friday 10:00 PM local time
-    function nextFridayAt22() {
-      const now = new Date();
-      const day = now.getDay();
-      const daysUntilFri = (5 - day + 7) % 7 || 7;
-      const next = new Date(now);
-      next.setDate(now.getDate() + daysUntilFri);
-      next.setHours(22,0,0,0);
-      return next;
-    }
-    let target = nextFridayAt22();
-    function updateCountdown(){
-      const now = new Date();
-      if(now > target) target = nextFridayAt22();
-      let diff = Math.max(0, target - now);
-      const hrs = String(Math.floor(diff / (1000*60*60))).padStart(2,'0');
-      diff %= 1000*60*60;
-      const mins = String(Math.floor(diff / (1000*60))).padStart(2,'0');
-      diff %= 1000*60;
-      const secs = String(Math.floor(diff / 1000)).padStart(2,'0');
-      document.getElementById('countdown').innerText = hrs+':'+mins+':'+secs;
-    }
-    setInterval(updateCountdown,1000); updateCountdown();
+    // -----------------------------
+    // Asset dropdown
+    // -----------------------------
+    let selected = ASSETS[0];
 
-    // unified profit calculator (input + slider)
-    (function(){
-      const input = document.getElementById('investAmt');
-      const slider = document.getElementById('rangeAmt');
-      const expected = document.getElementById('expected');
-      if(!input || !slider || !expected) return;
-      function update(v){
-        v = Number(v) || 0;
-        if(v < 100) v = 100;
-        if(v > 5000000) v = 5000000;
-        input.value = v;
-        slider.value = v;
-        expected.innerText = '$' + (v * 20).toLocaleString();
-      }
-      input.addEventListener('input', (e)=> update(e.target.value) );
-      slider.addEventListener('input', (e)=> update(e.target.value) );
-      update(Number(input.value) || 100);
-    })();
-
-    // testimonials weeks data (sample)
-    function testi(){
-      return {
-        weeks: [
-          { week:'Week 45', note:'Auto payout', amount:'$1,240.00', status:'Paid Fri 10:05 PM ET' },
-          { week:'Week 44', note:'Manual claim', amount:'$560.50', status:'Paid Fri 10:15 PM ET' },
-          { week:'Week 43', note:'Auto payout', amount:'$3,200.00', status:'Paid Fri 10:03 PM ET' }
-        ]
-      }
-    }
-
-    // rotating card carousel
-    const carousel = document.getElementById('carousel');
-    if(carousel){
-      const sampleCards = [
-        {name:'Alejandro', text:'Received $1,240 this week — instant and smooth.', amt:'$1,240'},
-        {name:'Mia', text:'Weekly payouts are reliable. Love the UX.', amt:'$560'},
-        {name:'Jon', text:'Big pool, low fees — cashed out $3,200.', amt:'$3,200'}
-      ];
-      function renderCarousel(){
-        carousel.innerHTML = '';
-        sampleCards.forEach(c=>{
-          const el = document.createElement('div');
-          el.className = 'min-w-[260px] glass p-4 rounded-xl card';
-          el.innerHTML = `<div class="font-semibold">${c.name}</div><div class="text-slate-400 text-sm mt-2">${c.text}</div><div class="mt-3 font-bold">${c.amt}</div>`;
-          carousel.appendChild(el);
+    function renderAssetMenu(){
+      const wrap = $("assetMenu").querySelector(".glass-dark");
+      wrap.innerHTML = "";
+      ASSETS.forEach(asset=>{
+        const btn = document.createElement("button");
+        btn.className = "w-full text-left px-3 py-2 rounded-xl hover:bg-white/5 transition flex items-center justify-between";
+        btn.innerHTML = `
+          <span class="flex items-center gap-2">
+            <span class="h-2.5 w-2.5 rounded-full" style="background:${asset.dot}"></span>
+            <span class="font-semibold">${asset.name}</span>
+            <span class="text-white/55 text-xs">${asset.ticker}</span>
+          </span>
+          <span class="text-xs text-white/55">${fmtUSD(asset.price)}</span>
+        `;
+        btn.addEventListener("click", ()=>{
+          setSelected(asset.ticker);
+          $("assetMenu").classList.add("hidden-soft");
         });
-      }
-      renderCarousel();
-      let scrollPos = 0;
-      setInterval(()=>{ 
-        scrollPos += 270; 
-        if(scrollPos > carousel.scrollWidth) scrollPos=0; 
-        carousel.scrollTo({ left: scrollPos, behavior: 'smooth' }); 
-      }, 3500);
+        wrap.appendChild(btn);
+      });
     }
 
-    /* ==========================================================
-       PREMIUM NOTIFICATION SYSTEM — FULLY UPDATED
-       ========================================================== */
+    function setSelected(ticker){
+      selected = ASSETS.find(a=>a.ticker===ticker) || ASSETS[0];
+      $("calcTitle").textContent = `${selected.name} (${selected.ticker})`;
+      $("assetTicker").textContent = selected.ticker;
+      $("amountTicker").textContent = selected.ticker;
+      $("assetDot").style.background = selected.dot;
 
-    const notifRoot = document.getElementById('notifRoot');
+      // lock range constraints
+      const r = $("lockRange");
+      r.min = selected.lockMin;
+      r.max = selected.lockMax;
+      r.value = clamp(Number(r.value), Number(r.min), Number(r.max));
 
-    function rand(min,max){ 
-      return Math.floor(Math.random()*(max-min+1))+min; 
+      // default amount if empty
+      const amt = Number($("amountInput").value || 0);
+      if (amt <= 0) $("amountInput").value = selected.min;
+
+      recalc();
     }
 
-    // Names realistas + censura
-    function randomUser() {
-      const firstNames = [
-        "M","PR","JU","T","EH","B","O","S","El","O",
-        "SoMI","SAtosHI21","Mari","VA","PA","Alnk","MO","Ca","Emma","MsBit"
-      ];
-      const lastInitials = ["R","M","T","A","L","P","G","S","C","D"];
-      
-      const f = firstNames[rand(0, firstNames.length - 1)];
-      const l = lastInitials[rand(0, lastInitials.length - 1)];
-      
-      return `${f} ${l}.***`;
+    $("assetBtn").addEventListener("click", ()=>{
+      $("assetMenu").classList.toggle("hidden-soft");
+    });
+
+    // -----------------------------
+    // Calculator logic
+    // APY increases slightly with lock duration (simple curve)
+    // reward = amount * (apy/100) * (days/365)
+    // -----------------------------
+    function calcApy(days){
+      const d = Number(days);
+      const span = (selected.lockMax - selected.lockMin) || 1;
+      const t = clamp((d - selected.lockMin) / span, 0, 1);
+      // gentle curve
+      const boost = (0.35 + 0.85*t) * 1.1; // ~0.4..1.3
+      return selected.baseApy + boost;
     }
 
-    // Cryptos disponibles
-    function randomCrypto() {
-      const cryptos = ["BTC", "USDT", "ETH", "SOL"];
-      return cryptos[rand(0, cryptos.length - 1)];
+    function recalc(){
+      const amount = Math.max(0, Number($("amountInput").value || 0));
+      const days = Number($("lockRange").value || 30);
+
+      $("lockLabel").textContent = `${days} days`;
+
+      const usd = amount * selected.price;
+      $("usdValue").textContent = fmtUSD(usd);
+
+      const apy = calcApy(days);
+      $("apyValue").textContent = apy.toFixed(2);
+
+      const reward = amount * (apy/100) * (days/365);
+      // show reward in same asset
+      $("rewardValue").textContent = `${reward.toFixed(4)} ${selected.ticker}`;
+
+      // modal snapshot
+      $("modalAsset").textContent = selected.ticker;
+      $("modalAmount").textContent = `${amount} ${selected.ticker}`;
+      $("modalLock").textContent = `${days} days`;
+      $("modalReward").textContent = `${reward.toFixed(4)} ${selected.ticker}`;
     }
 
-    function makeNotif(){
-      const amount = rand(50, 12500).toLocaleString();
-      const user = randomUser();
-      const coin = randomCrypto();
+    $("amountInput").addEventListener("input", recalc);
+    $("lockRange").addEventListener("input", recalc);
 
-      const text = `${user} cashed out $${amount} in ${coin}`;
+    // -----------------------------
+    // Options cards
+    // -----------------------------
+    const sparkPaths = {
+      wavy:    "M2 46 C 18 38, 26 54, 40 46 S 62 38, 78 46 S 98 56, 112 46 S 138 38, 156 46 S 182 54, 198 46",
+      wavy2:   "M2 46 C 20 54, 28 32, 44 46 S 70 56, 88 46 S 112 32, 132 46 S 156 58, 176 46 S 190 34, 198 46",
+      flat:    "M2 46 C 30 46, 60 46, 88 46 S 140 46, 198 46",
+      spiky:   "M2 46 C 18 18, 34 74, 52 46 S 78 18, 96 46 S 120 80, 140 46 S 162 18, 178 46 S 190 70, 198 46",
+      spiky2:  "M2 46 C 12 70, 22 12, 40 46 S 60 74, 78 46 S 98 12, 116 46 S 140 82, 156 46 S 176 12, 190 46 S 196 60, 198 46",
+      wavefast:"M2 46 C 10 36, 18 56, 26 46 S 42 36, 58 46 S 74 56, 90 46 S 106 36, 122 46 S 138 56, 154 46 S 170 36, 186 46 S 194 56, 198 46",
+    };
 
-      const card = document.createElement('div');
-      card.className = 'notification';
+    function cardIcon(ticker){
+      // tiny “logo” badges (simple)
+      const map = {
+        ETH: { bg:"rgba(6,182,212,.15)", fg:"rgba(6,182,212,.95)", txt:"Ξ" },
+        DOT: { bg:"rgba(236,72,153,.15)", fg:"rgba(236,72,153,.95)", txt:"●" },
+        ATOM:{ bg:"rgba(148,163,184,.15)", fg:"rgba(148,163,184,.9)", txt:"✦" },
+        ADA: { bg:"rgba(124,58,237,.15)", fg:"rgba(124,58,237,.95)", txt:"◈" },
+        SOL: { bg:"rgba(34,197,94,.15)", fg:"rgba(34,197,94,.9)", txt:"≋" },
+        NEAR:{ bg:"rgba(255,255,255,.12)", fg:"rgba(255,255,255,.9)", txt:"N" },
+      };
+      return map[ticker] || { bg:"rgba(255,255,255,.12)", fg:"rgba(255,255,255,.9)", txt:"◎" };
+    }
 
-      card.innerHTML = `
-        <div class="flex items-center justify-between">
-          <div>
-            <div class="font-semibold">${text}</div>
-            <div class="text-xs small-muted">${new Date().toLocaleTimeString()}</div>
+    function renderOptions(list){
+      const grid = $("optionsGrid");
+      grid.innerHTML = "";
+      list.forEach(opt=>{
+        const ic = cardIcon(opt.ticker);
+        const div = document.createElement("div");
+        div.className = "glass rounded-3xl p-5 hover:translate-y-[-2px] transition shadow-soft";
+        div.innerHTML = `
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="h-10 w-10 rounded-2xl flex items-center justify-center"
+                   style="background:${ic.bg}; border:1px solid rgba(255,255,255,.10)">
+                <span style="color:${ic.fg}; font-weight:800">${ic.txt}</span>
+              </div>
+              <div>
+                <div class="font-bold">${opt.name}</div>
+                <div class="text-xs text-white/55 -mt-0.5">${opt.ticker}</div>
+              </div>
+            </div>
+
+            <button class="btn rounded-xl px-3 py-2 text-sm" data-stake="${opt.ticker}">
+              Stake
+            </button>
           </div>
-          <div class="font-bold amount">$${amount}</div>
-        </div>
-      `;
 
-      notifRoot.prepend(card);
+          <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
+            <div class="glass-dark rounded-2xl p-4">
+              <div class="text-xs text-white/60">APY</div>
+              <div class="mt-1 text-xl font-extrabold">~ ${opt.apy.toFixed(2)}%</div>
+            </div>
+            <div class="glass-dark rounded-2xl p-4">
+              <div class="text-xs text-white/60">Unstake</div>
+              <div class="mt-1 text-xl font-extrabold">${opt.unstake}</div>
+            </div>
+          </div>
 
-      setTimeout(()=>{
-          card.style.opacity='0';
-          setTimeout(()=>card.remove(),700);
-      },6000);
+          <div class="mt-3 flex items-center justify-between text-xs text-white/60">
+            <span>Minimum</span>
+            <span class="text-white/80 font-semibold">${opt.min}</span>
+          </div>
+
+          <div class="mt-4 glass-dark rounded-2xl p-3">
+            <svg viewBox="0 0 200 60" class="w-full h-12">
+              <path d="${sparkPaths[opt.spark] || sparkPaths.wavy}" fill="none" stroke="rgba(167,139,250,.85)" stroke-width="2.2" stroke-linecap="round"/>
+              <path d="${sparkPaths[opt.spark] || sparkPaths.wavy}" fill="none" stroke="rgba(6,182,212,.25)" stroke-width="6" stroke-linecap="round"/>
+            </svg>
+          </div>
+        `;
+        grid.appendChild(div);
+      });
+
+      // bind stake buttons
+      grid.querySelectorAll("[data-stake]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const t = btn.getAttribute("data-stake");
+          setSelected(t);
+          openModal();
+        });
+      });
     }
 
-    // Primera + intervalo
-    setTimeout(()=>makeNotif(), 1200);
-    setInterval(()=>makeNotif(), 14000);
+    // shuffle/sort
+    function shuffleRates(){
+      OPTIONS.forEach(o=>{
+        // +- 15%
+        const mult = rnd(0.88, 1.12);
+        o.apy = clamp(o.apy * mult, 1.5, 24);
+      });
+      renderOptions(OPTIONS);
+    }
+    function sortByApy(){
+      OPTIONS.sort((a,b)=> b.apy - a.apy);
+      renderOptions(OPTIONS);
+    }
 
-    // demo buttons
-    const stakeNowBtn = document.getElementById('stakeNow');
-    if(stakeNowBtn) stakeNowBtn.addEventListener('click', ()=>alert('Stake flow started — demo. Sign Up or connect your wallet to continue.'));
-    
-    const claimNowBtn = document.getElementById('claimNow');
-    if(claimNowBtn) claimNowBtn.addEventListener('click', ()=>alert('Claim flow started — demo.'));
-</script>
+    $("btnShuffle").addEventListener("click", shuffleRates);
+    $("btnShuffleM").addEventListener("click", shuffleRates);
+    $("btnSort").addEventListener("click", sortByApy);
+    $("btnSortM").addEventListener("click", sortByApy);
 
+    // -----------------------------
+    // Modal
+    // -----------------------------
+    const modalWrap = $("modalWrap");
+    function openModal(){
+      modalWrap.classList.remove("hidden-soft");
+      modalWrap.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      recalc();
+    }
+    function closeModal(){
+      modalWrap.classList.add("hidden-soft");
+      modalWrap.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+
+    ["btnStakeTop","btnStakeM","btnStakeHero","btnStakeCard","btnStakeFooter"].forEach(id=>{
+      const el = $(id);
+      if (el) el.addEventListener("click", openModal);
+    });
+
+    $("modalClose").addEventListener("click", closeModal);
+    $("modalBackdrop").addEventListener("click", closeModal);
+    document.addEventListener("keydown", (e)=>{ if(e.key==="Escape") closeModal(); });
+
+    $("modalSimulate").addEventListener("click", ()=>{
+      $("modalSimulate").textContent = "Simulated ✓";
+      setTimeout(()=> $("modalSimulate").textContent = "Simulate tx (UI)", 1200);
+    });
+    $("modalConfirm").addEventListener("click", ()=>{
+      $("modalConfirm").textContent = "Connect backend ✦";
+      setTimeout(()=> $("modalConfirm").textContent = "Confirm (connect backend)", 1200);
+    });
+
+    // other buttons
+    function toast(msg){
+      // simple lightweight toast
+      const t = document.createElement("div");
+      t.className = "fixed right-4 top-4 z-[120] glass rounded-2xl px-4 py-3 text-sm text-white/85 shadow-soft";
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(()=>{ t.style.opacity="0"; t.style.transform="translateY(-6px)"; t.style.transition="all .25s ease"; }, 1400);
+      setTimeout(()=> t.remove(), 1750);
+    }
+    $("btnDownload").addEventListener("click", ()=>toast("Download placeholder (UI)"));
+    $("btnDownloadM").addEventListener("click", ()=>toast("Download placeholder (UI)"));
+    $("btnConnect").addEventListener("click", ()=>toast("Wallet connect placeholder (UI)"));
+    $("btnTerms").addEventListener("click", ()=>toast("Terms placeholder"));
+    $("btnPrivacy").addEventListener("click", ()=>toast("Privacy placeholder"));
+
+    // close asset menu if click outside
+    document.addEventListener("click", (e)=>{
+      const menu = $("assetMenu");
+      const btn = $("assetBtn");
+      if (!menu.contains(e.target) && !btn.contains(e.target)){
+        menu.classList.add("hidden-soft");
+      }
+    });
+
+    // -----------------------------
+    // Init
+    // -----------------------------
+    $("year").textContent = new Date().getFullYear();
+
+    renderAssetMenu();
+    renderOptions(OPTIONS);
+    setSelected("ETH");
+    recalc();
+  </script>
 </body>
 </html>
