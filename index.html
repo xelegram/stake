@@ -19,7 +19,17 @@
     body { background: radial-gradient(ellipse at top, #030312 0%, #000005 70%); }
     .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(8px); }
     .card { border: 1px solid rgba(255,255,255,0.04); }
-    .notif-top { position: fixed; right: 20px; top: 20px; z-index: 60; display:flex; flex-direction:column; gap:10px; }
+    
+.notif-top {
+    position: fixed;
+    right: 20px;
+    top: 20px;
+    z-index: 9000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
     .crypto-icon { width:44px; height:44px; }
     .gradient-btn{ background: linear-gradient(90deg,var(--grad1),var(--grad2)); }
     .small-muted{ color:rgba(203,213,225,0.6); }
@@ -47,7 +57,9 @@
     /* new-premium-noti kept for compatibility (thin variant) */
     .new-premium-noti{ display:none; }
   
-  
+  #login{
+      background: linear-gradient(90deg, #05e72b, var(--grad2));
+  }
   
 /* === PROMO BANNER MAIN === */
 .promo-banner {
@@ -335,24 +347,277 @@
 
 
 
+
+/* =========================
+   MODERN HEADER (DESKTOP+MOBILE)
+   ========================= */
+:root{
+  --hdr-bg: rgba(6,10,18,0.55);
+  --hdr-border: rgba(255,255,255,0.10);
+  --hdr-glow: rgba(0,255,190,0.18);
+}
+
+.cs-header{
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  backdrop-filter: blur(14px);
+  background: linear-gradient(180deg, rgba(2,6,18,0.65), rgba(2,6,18,0.35));
+  border-bottom: 1px solid var(--hdr-border);
+}
+
+.cs-header::after{
+  content:"";
+  position:absolute;
+  left:0; right:0; bottom:-1px;
+  height:1px;
+  background: linear-gradient(90deg, transparent, rgba(0,255,190,0.55), transparent);
+  opacity:.75;
+  pointer-events:none;
+}
+
+.cs-wrap{
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 14px 18px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+}
+
+.cs-brand{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.cs-mark{
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.25), rgba(255,255,255,0.08) 35%, rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 0 18px var(--hdr-glow);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex: 0 0 auto;
+}
+
+.cs-mark span{
+  font-weight: 900;
+  font-size: 14px;
+  color: #00120f;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, var(--grad1), var(--grad2));
+}
+
+.cs-brandText{
+  min-width: 0;
+  line-height: 1.05;
+}
+
+.cs-title{
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: .2px;
+  background: linear-gradient(90deg, #8b5cf6, #22d3ee, #00ff9c);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color: transparent;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cs-sub{
+  margin-top: 3px;
+  font-size: 12px;
+  color: rgba(203,213,225,0.62);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cs-actions{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.cs-nav{
+  display:none;
+  align-items:center;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.cs-link{
+  font-size: 13px;
+  color: rgba(255,255,255,0.70);
+  padding: 10px 12px;
+  border-radius: 999px;
+  transition: .18s ease;
+}
+.cs-link:hover{
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.92);
+}
+
+.cs-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: .2px;
+  white-space: nowrap;
+  transition: .18s ease;
+}
+
+.cs-btn-login{
+  background: linear-gradient(90deg, #05e72b, var(--grad2));
+  color:#00120f;
+  box-shadow: 0 0 18px rgba(0,255,160,0.20);
+}
+.cs-btn-login:hover{ transform: translateY(-1px); box-shadow: 0 0 24px rgba(0,255,160,0.35); }
+
+.cs-btn-signup{
+  background: linear-gradient(90deg, var(--grad1), var(--grad2));
+  color:#00120f;
+  box-shadow: 0 0 18px rgba(34,211,238,0.18);
+}
+.cs-btn-signup:hover{ transform: translateY(-1px); box-shadow: 0 0 26px rgba(34,211,238,0.30); }
+
+.cs-burger{
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.10);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  color: rgba(255,255,255,0.90);
+  font-weight: 900;
+}
+
+.cs-burger:active{ transform: scale(0.98); }
+
+/* Mobile menu panel */
+.cs-panel{
+  display:none;
+  padding: 12px 18px 16px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  background: rgba(2,6,18,0.45);
+  backdrop-filter: blur(14px);
+}
+.cs-panel.open{ display:block; }
+
+.cs-panelGrid{
+  max-width: 72rem;
+  margin: 0 auto;
+  display:grid;
+  gap: 10px;
+}
+
+.cs-panelRow{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.cs-panel a{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.86);
+  font-weight: 800;
+  font-size: 13px;
+}
+.cs-panel a:active{ transform: scale(0.99); }
+
+.cs-panel .cs-panelFull{ grid-column: 1 / -1; }
+
+/* Desktop layout */
+@media (min-width: 900px){
+  .cs-nav{ display:flex; }
+  .cs-burger{ display:none; }
+  .cs-sub{ display:block; }
+}
+@media (max-width: 420px){
+  .cs-mark{ width: 38px; height:38px; border-radius: 12px; }
+  .cs-title{ font-size: 16px; }
+  .cs-btn{ padding: 9px 12px; }
+  .cs-panelRow{ grid-template-columns: 1fr; }
+}
+
   </style>
 </head>
 <body class="text-slate-200 font-sans leading-relaxed">
-  <header class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-600 to-teal-400 flex items-center justify-center text-black font-bold">X</div>
-      <div>
-        <h1 class="text-xl font-semibold">CryptoStake</h1>
-        <p class="text-sm small-muted">Earn passive rewards — Cashouts every Friday at 10:00 PM ET</p>
+<header class="cs-header">
+  <div class="cs-wrap">
+
+    <!-- Brand -->
+    <div class="cs-brand">
+      <div class="cs-mark" aria-hidden="true"><span>CS</span></div>
+
+      <div class="cs-brandText">
+        <div class="cs-title">CryptoStake</div>
+        <div class="cs-sub">Earn passive rewards — Cashouts every Friday at 10:00 PM ET</div>
       </div>
     </div>
-    <nav class="space-x-4 text-sm">
-      <a href="#stake" class="px-4 py-2">Stake</a>
-      <a href="#how" class="px-4 py-2">How it works</a>
-      <a href="#testimonials" class="px-4 py-2">Withdrawals</a>
-      <a href="#" id="signup" class="px-4 py-2 gradient-btn rounded-full text-black font-semibold">Sign Up</a>
-    </nav>
-  </header>
+
+    <!-- Actions -->
+    <div class="cs-actions">
+
+      <!-- Desktop nav -->
+      <nav class="cs-nav" aria-label="Primary">
+        <a class="cs-link" href="#stake">Stake</a>
+        <a class="cs-link" href="#how">How it works</a>
+        <a class="cs-link" href="#testimonials">Withdrawals</a>
+      </nav>
+
+      <!-- Desktop buttons (NO IDs here to avoid duplicates) -->
+      <a href="#" data-login class="cs-btn cs-btn-login">Log In</a>
+      <a href="#" data-signup class="cs-btn cs-btn-signup">Sign Up</a>
+
+      <!-- Mobile burger -->
+      <button id="csBurger" class="cs-burger" type="button" aria-label="Open menu" aria-expanded="false">
+        ☰
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile panel (IDs ONLY HERE to trigger your modals) -->
+  <div id="csPanel" class="cs-panel" aria-label="Mobile menu">
+    <div class="cs-panelGrid">
+      <div class="cs-panelRow">
+        <a href="#stake">Stake</a>
+        <a href="#how">How it works</a>
+      </div>
+
+      <a class="cs-panelFull" href="#testimonials">Withdrawals</a>
+
+      <a class="cs-panelFull cs-btn cs-btn-login" href="#" id="login">Log In</a>
+      <a class="cs-panelFull cs-btn cs-btn-signup" href="#" id="signup">Sign Up</a>
+    </div>
+  </div>
+</header>
+
   
   
 <!-- PROMO BANNER -->
@@ -648,7 +913,7 @@ setInterval(()=> {
 }, 1000);
 </script>
 <script src="./signupModal.js"></script>
-
+<script src="./loginmodal.js"></script>
 
 <script>
     AOS.init();
