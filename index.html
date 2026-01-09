@@ -276,9 +276,9 @@ Worry of losing trade? We help you financial freedom to maximize you. Our platfo
                 <span>Lock period</span>
                 <span class="text-white/80 font-semibold" id="lockLabel">30 days</span>
               </div>
-              <input id="lockRange" class="mt-3 w-full" type="range" min="7" max="180" value="30" />
+              <input id="lockRange" class="mt-3 w-full" type="range" min="7" max="30" value="30" />
               <div class="mt-2 flex items-center justify-between text-[11px] text-white/45">
-                <span>7d</span><span>90d</span><span>180d</span>
+                <span>7d</span><span>18d</span><span>30d</span>
               </div>
             </div>
 
@@ -463,261 +463,319 @@ Worry of losing trade? We help you financial freedom to maximize you. Our platfo
 <script src="./signupModal.js"></script>
 <script src="./loginmodal.js"></script>
 
-  <script>
-    // -----------------------------
-    // Data (edit freely)
-    // -----------------------------
-    const ASSETS = [
-      { name:"Ethereum", ticker:"ETH", price: 3120, dot:"rgba(6,182,212,.95)", baseApy: 117.6, min: 0.25, lockMin: 7, lockMax: 180 },
-      { name:"USDT", ticker:"trc20", price: 1, dot:"rgba(34,197,94,.9)", baseApy: 120.1, min: 1, lockMin: 7, lockMax: 90 },
-      { name:"Bitcoin", ticker:"BTC", price: 90956.51, dot:"rgba(124,58,237,.95)", baseApy: 115.8, min: 50, lockMin: 7, lockMax: 120 },
-      { name:"Solana", ticker:"SOL", price: 140.63, dot:"rgba(236,72,153,.9)", baseApy: 113.1, min: 20, lockMin: 14, lockMax: 180 },
-      { name:"Litecoin", ticker:"LTC", price: 81.53, dot:"rgba(148,163,184,.9)", baseApy: 116.2, min: 5, lockMin: 14, lockMax: 180 },
-      { name:"TRON", ticker:"TRX", price: 0.29, dot:"rgba(255,255,255,.8)", baseApy: 128.2, min: 10, lockMin: 7, lockMax: 120 },
-    ];
+<script>
+  // -----------------------------
+  // Data (edit freely)
+  // -----------------------------
+  const ASSETS = [
+    { name:"Ethereum", ticker:"ETH",  price: 3120,     dot:"rgba(6,182,212,.95)", baseApy: 117.6, min: 0.25, lockMin: 7,  lockMax: 30 },
+    { name:"USDT",     ticker:"USDT", price: 1,        dot:"rgba(34,197,94,.9)",  baseApy: 120.1, min: 1,    lockMin: 7,  lockMax: 30  },
+    { name:"Bitcoin",  ticker:"BTC",  price: 90956.51, dot:"rgba(124,58,237,.95)",baseApy: 115.8, min: 50,   lockMin: 7,  lockMax: 30 },
+    { name:"Solana",   ticker:"SOL",  price: 140.63,   dot:"rgba(236,72,153,.9)", baseApy: 113.1, min: 20,   lockMin: 14, lockMax: 30 },
+    { name:"Litecoin", ticker:"LTC",  price: 81.53,    dot:"rgba(148,163,184,.9)",baseApy: 116.2, min: 5,    lockMin: 14, lockMax: 30 },
+    { name:"TRON",     ticker:"TRX",  price: 0.29,     dot:"rgba(255,255,255,.8)",baseApy: 128.2, min: 10,   lockMin: 7,  lockMax: 30 },
+  ];
 
-    const OPTIONS = [
-      { name:"Ethereum", ticker:"ETH", apy: 117.6, unstake:"10 days", min:"0.25 ETH", spark:"wavy" },
-      { name:"USDT", ticker:"trc20", apy: 120.1, unstake:"28 days", min:"20 trc20", spark:"spiky" },
-      { name:"Bitcoin", ticker:"BTC", apy: 115.8, unstake:"21 days", min:"5 BTC", spark:"flat" },
-      { name:"Solana", ticker:"SOL", apy: 113.1, unstake:"instant", min:"50 SOL", spark:"wavy2" },
-      { name:"Litecoin", ticker:"LTC", apy: 116.2, unstake:"5 days", min:"1 LTC", spark:"wavefast" },
-      { name:"TRON", ticker:"TRX", apy: 128.2, unstake:"4 days", min:"10 TRX", spark:"spiky2" },
-    ];
+  const OPTIONS = [
+    { name:"Ethereum", ticker:"ETH",  apy: 117.6, unstake:"10 days",  min:"0.25 ETH",  spark:"wavy" },
+    { name:"USDT",     ticker:"USDT", apy: 120.1, unstake:"28 days",  min:"20 trc20",  spark:"spiky" },
+    { name:"Bitcoin",  ticker:"BTC",  apy: 115.8, unstake:"21 days",  min:"5 BTC",     spark:"flat" },
+    { name:"Solana",   ticker:"SOL",  apy: 113.1, unstake:"instant",  min:"50 SOL",    spark:"wavy2" },
+    { name:"Litecoin", ticker:"LTC",  apy: 116.2, unstake:"5 days",   min:"1 LTC",     spark:"wavefast" },
+    { name:"TRON",     ticker:"TRX",  apy: 128.2, unstake:"4 days",   min:"10 TRX",    spark:"spiky2" },
+  ];
 
-    // -----------------------------
-    // Helpers
-    // -----------------------------
-    const $ = (id) => document.getElementById(id);
-    const fmtUSD = (n) => {
-      const v = Number(n || 0);
-      return v.toLocaleString(undefined, { style:"currency", currency:"USD", maximumFractionDigits: 2 });
-    };
-    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-    const rnd = (a,b) => a + Math.random()*(b-a);
+  // -----------------------------
+  // Helpers
+  // -----------------------------
+  const $ = (id) => document.getElementById(id);
+  const fmtUSD = (n) => {
+    const v = Number(n || 0);
+    return v.toLocaleString(undefined, { style:"currency", currency:"USD", maximumFractionDigits: 2 });
+  };
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const rnd = (a,b) => a + Math.random()*(b-a);
 
-    // -----------------------------
-    // Mobile menu
-    // -----------------------------
-    const mobileBtn = $("btnMobile");
-    const mobileMenu = $("mobileMenu");
+  // -----------------------------
+  // Mobile menu
+  // -----------------------------
+  const mobileBtn = $("btnMobile");
+  const mobileMenu = $("mobileMenu");
+  if (mobileBtn && mobileMenu) {
     mobileBtn.addEventListener("click", () => {
       mobileMenu.classList.toggle("hidden-soft");
     });
-    // close mobile menu when clicking an anchor
     mobileMenu.querySelectorAll("a").forEach(a=>{
       a.addEventListener("click", ()=> mobileMenu.classList.add("hidden-soft"));
     });
+  }
 
-    // -----------------------------
-    // Asset dropdown
-    // -----------------------------
-    let selected = ASSETS[0];
+  // -----------------------------
+  // Asset dropdown
+  // -----------------------------
+  let selected = ASSETS[0];
 
-    function renderAssetMenu(){
-      const wrap = $("assetMenu").querySelector(".glass-dark");
-      wrap.innerHTML = "";
-      ASSETS.forEach(asset=>{
-        const btn = document.createElement("button");
-        btn.className = "w-full text-left px-3 py-2 rounded-xl hover:bg-white/5 transition flex items-center justify-between";
-        btn.innerHTML = `
-          <span class="flex items-center gap-2">
-            <span class="h-2.5 w-2.5 rounded-full" style="background:${asset.dot}"></span>
-            <span class="font-semibold">${asset.name}</span>
-            <span class="text-white/55 text-xs">${asset.ticker}</span>
-          </span>
-          <span class="text-xs text-white/55">${fmtUSD(asset.price)}</span>
-        `;
-        btn.addEventListener("click", ()=>{
-          setSelected(asset.ticker);
-          $("assetMenu").classList.add("hidden-soft");
-        });
-        wrap.appendChild(btn);
+  function renderAssetMenu(){
+    const menu = $("assetMenu");
+    if (!menu) return;
+    const wrap = menu.querySelector(".glass-dark");
+    if (!wrap) return;
+
+    wrap.innerHTML = "";
+    ASSETS.forEach(asset=>{
+      const btn = document.createElement("button");
+      btn.className = "w-full text-left px-3 py-2 rounded-xl hover:bg-white/5 transition flex items-center justify-between";
+      btn.innerHTML = `
+        <span class="flex items-center gap-2">
+          <span class="h-2.5 w-2.5 rounded-full" style="background:${asset.dot}"></span>
+          <span class="font-semibold">${asset.name}</span>
+          <span class="text-white/55 text-xs">${asset.ticker}</span>
+        </span>
+        <span class="text-xs text-white/55">${fmtUSD(asset.price)}</span>
+      `;
+      btn.addEventListener("click", ()=>{
+        setSelected(asset.ticker);
+        menu.classList.add("hidden-soft");
       });
-    }
+      wrap.appendChild(btn);
+    });
+  }
 
-    function setSelected(ticker){
-      selected = ASSETS.find(a=>a.ticker===ticker) || ASSETS[0];
-      $("calcTitle").textContent = `${selected.name} (${selected.ticker})`;
-      $("assetTicker").textContent = selected.ticker;
-      $("amountTicker").textContent = selected.ticker;
-      $("assetDot").style.background = selected.dot;
+  function setSelected(ticker){
+    selected = ASSETS.find(a=>a.ticker===ticker) || ASSETS[0];
 
-      // lock range constraints
-      const r = $("lockRange");
+    const calcTitle = $("calcTitle");
+    if (calcTitle) calcTitle.textContent = `${selected.name} (${selected.ticker})`;
+
+    const assetTicker = $("assetTicker");
+    if (assetTicker) assetTicker.textContent = selected.ticker;
+
+    const amountTicker = $("amountTicker");
+    if (amountTicker) amountTicker.textContent = selected.ticker;
+
+    const assetDot = $("assetDot");
+    if (assetDot) assetDot.style.background = selected.dot;
+
+    // lock range constraints
+    const r = $("lockRange");
+    if (r) {
       r.min = selected.lockMin;
       r.max = selected.lockMax;
       r.value = clamp(Number(r.value), Number(r.min), Number(r.max));
-
-      // default amount if empty
-      const amt = Number($("amountInput").value || 0);
-      if (amt <= 0) $("amountInput").value = selected.min;
-
-      recalc();
     }
 
-    $("assetBtn").addEventListener("click", ()=>{
-      $("assetMenu").classList.toggle("hidden-soft");
+    // default amount if empty/0
+    const amountInput = $("amountInput");
+    if (amountInput) {
+      const amt = Number(amountInput.value || 0);
+      if (amt <= 0) amountInput.value = selected.min;
+    }
+
+    recalc();
+  }
+
+  const assetBtn = $("assetBtn");
+  if (assetBtn) {
+    assetBtn.addEventListener("click", ()=>{
+      const menu = $("assetMenu");
+      if (menu) menu.classList.toggle("hidden-soft");
+    });
+  }
+
+  // -----------------------------
+  // Calculator logic (UPDATED)
+  // IMPORTANT: APY must be EXACTLY selected.baseApy (117.6 etc.)
+  // reward_period = amount * (apy/100) * (days/365)
+  // increase_year  = amount * (apy/100)  (optional element id: increaseYearValue)
+  // -----------------------------
+// -----------------------------
+// Calculator logic
+// APY = % por lock period
+// +5% EXTRA COMPUESTO POR DÍA
+// -----------------------------
+const DAILY_BONUS = 0.05; // 5% diario
+
+function calcApy(){
+  // APY base EXACTO (120.10 etc.)
+  return Number(selected.baseApy || 0);
+}
+
+function recalc(){
+  const amount = Math.max(0, Number(($("amountInput")?.value) || 0));
+  const days   = Number(($("lockRange")?.value) || 1);
+
+  // UI
+  $("lockLabel") && ($("lockLabel").textContent = `${days} days`);
+
+  const usd = amount * Number(selected.price || 0);
+  $("usdValue") && ($("usdValue").textContent = fmtUSD(usd));
+
+  const apy = calcApy();
+  $("apyValue") && ($("apyValue").textContent = apy.toFixed(2));
+
+  // -----------------------------
+  // CORE MATH
+  // -----------------------------
+
+  // Reward base por lock (NO anual)
+  const baseReward = amount * (apy / 100);
+
+  // Bonus diario compuesto
+  const dailyMultiplier = Math.pow(1 + DAILY_BONUS, days);
+
+  // Reward final
+  const reward = baseReward * dailyMultiplier;
+
+  $("rewardValue") &&
+    ($("rewardValue").textContent = `${reward.toFixed(4)} ${selected.ticker}`);
+
+  // (opcional) mostrar breakdown si quieres
+  const dbg = document.getElementById("rewardDebug");
+  if (dbg) {
+    dbg.innerHTML = `
+      Base reward: ${baseReward.toFixed(4)}<br>
+      Daily bonus x${dailyMultiplier.toFixed(2)}
+    `;
+  }
+
+  // Modal snapshot
+  $("modalAsset") && ($("modalAsset").textContent = selected.ticker);
+  $("modalAmount") && ($("modalAmount").textContent = `${amount} ${selected.ticker}`);
+  $("modalLock") && ($("modalLock").textContent = `${days} days`);
+  $("modalReward") && ($("modalReward").textContent = `${reward.toFixed(4)} ${selected.ticker}`);
+}
+
+  const amountInputEl = $("amountInput");
+  if (amountInputEl) amountInputEl.addEventListener("input", recalc);
+
+  const lockRangeEl = $("lockRange");
+  if (lockRangeEl) lockRangeEl.addEventListener("input", recalc);
+
+  // -----------------------------
+  // Options cards
+  // -----------------------------
+  const sparkPaths = {
+    wavy:    "M2 46 C 18 38, 26 54, 40 46 S 62 38, 78 46 S 98 56, 112 46 S 138 38, 156 46 S 182 54, 198 46",
+    wavy2:   "M2 46 C 20 54, 28 32, 44 46 S 70 56, 88 46 S 112 32, 132 46 S 156 58, 176 46 S 190 34, 198 46",
+    flat:    "M2 46 C 30 46, 60 46, 88 46 S 140 46, 198 46",
+    spiky:   "M2 46 C 18 18, 34 74, 52 46 S 78 18, 96 46 S 120 80, 140 46 S 162 18, 178 46 S 190 70, 198 46",
+    spiky2:  "M2 46 C 12 70, 22 12, 40 46 S 60 74, 78 46 S 98 12, 116 46 S 140 82, 156 46 S 176 12, 190 46 S 196 60, 198 46",
+    wavefast:"M2 46 C 10 36, 18 56, 26 46 S 42 36, 58 46 S 74 56, 90 46 S 106 36, 122 46 S 138 56, 154 46 S 170 36, 186 46 S 194 56, 198 46",
+  };
+
+  function cardIcon(ticker){
+    const map = {
+      ETH:  { bg:"rgba(6,182,212,.15)",  fg:"rgba(6,182,212,.95)",  txt:"Ξ" },
+      USDT: { bg:"rgba(34,197,94,.15)",  fg:"rgba(34,197,94,.95)",  txt:"₮" },
+      BTC:  { bg:"rgba(249,115,22,.15)", fg:"rgba(249,115,22,.95)", txt:"₿" },
+      SOL:  { bg:"rgba(236,72,153,.15)", fg:"rgba(236,72,153,.95)", txt:"≋" },
+      LTC:  { bg:"rgba(148,163,184,.15)",fg:"rgba(148,163,184,.95)",txt:"Ł" },
+      TRX:  { bg:"rgba(239,68,68,.15)",  fg:"rgba(239,68,68,.95)",  txt:"T" },
+    };
+    return map[ticker] || { bg:"rgba(255,255,255,.12)", fg:"rgba(255,255,255,.9)", txt:"◎" };
+  }
+
+  function renderOptions(list){
+    const grid = $("optionsGrid");
+    if (!grid) return;
+
+    grid.innerHTML = "";
+    list.forEach(opt=>{
+      const ic = cardIcon(opt.ticker);
+      const div = document.createElement("div");
+      div.className = "glass rounded-3xl p-5 hover:translate-y-[-2px] transition shadow-soft";
+      div.innerHTML = `
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="h-10 w-10 rounded-2xl flex items-center justify-center"
+                 style="background:${ic.bg}; border:1px solid rgba(255,255,255,.10)">
+              <span style="color:${ic.fg}; font-weight:800">${ic.txt}</span>
+            </div>
+            <div>
+              <div class="font-bold">${opt.name}</div>
+              <div class="text-xs text-white/55 -mt-0.5">${opt.ticker}</div>
+            </div>
+          </div>
+
+          <button class="btn rounded-xl px-3 py-2 text-sm" data-stake="${opt.ticker}">
+            Stake
+          </button>
+        </div>
+
+        <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
+          <div class="glass-dark rounded-2xl p-4">
+            <div class="text-xs text-white/60">APY</div>
+            <div class="mt-1 text-xl font-extrabold">~ ${Number(opt.apy).toFixed(2)}%</div>
+          </div>
+          <div class="glass-dark rounded-2xl p-4">
+            <div class="text-xs text-white/60">Unstake</div>
+            <div class="mt-1 text-xl font-extrabold">${opt.unstake}</div>
+          </div>
+        </div>
+
+        <div class="mt-3 flex items-center justify-between text-xs text-white/60">
+          <span>Minimum</span>
+          <span class="text-white/80 font-semibold">${opt.min}</span>
+        </div>
+
+        <div class="mt-4 glass-dark rounded-2xl p-3">
+          <svg viewBox="0 0 200 60" class="w-full h-12">
+            <path d="${sparkPaths[opt.spark] || sparkPaths.wavy}" fill="none" stroke="rgba(167,139,250,.85)" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="${sparkPaths[opt.spark] || sparkPaths.wavy}" fill="none" stroke="rgba(6,182,212,.25)" stroke-width="6" stroke-linecap="round"/>
+          </svg>
+        </div>
+      `;
+      grid.appendChild(div);
     });
 
-    // -----------------------------
-    // Calculator logic
-    // APY increases slightly with lock duration (simple curve)
-    // reward = amount * (apy/100) * (days/365)
-    // -----------------------------
-    function calcApy(days){
-      const d = Number(days);
-      const span = (selected.lockMax - selected.lockMin) || 1;
-      const t = clamp((d - selected.lockMin) / span, 0, 1);
-      // gentle curve
-      const boost = (0.35 + 0.85*t) * 1.1; // ~0.4..1.3
-      return selected.baseApy + boost;
-    }
-
-    function recalc(){
-      const amount = Math.max(0, Number($("amountInput").value || 0));
-      const days = Number($("lockRange").value || 30);
-
-      $("lockLabel").textContent = `${days} days`;
-
-      const usd = amount * selected.price;
-      $("usdValue").textContent = fmtUSD(usd);
-
-      const apy = calcApy(days);
-      $("apyValue").textContent = apy.toFixed(2);
-
-      const reward = amount * (apy/100) * (days/365);
-      // show reward in same asset
-      $("rewardValue").textContent = `${reward.toFixed(4)} ${selected.ticker}`;
-
-      // modal snapshot
-      $("modalAsset").textContent = selected.ticker;
-      $("modalAmount").textContent = `${amount} ${selected.ticker}`;
-      $("modalLock").textContent = `${days} days`;
-      $("modalReward").textContent = `${reward.toFixed(4)} ${selected.ticker}`;
-    }
-
-    $("amountInput").addEventListener("input", recalc);
-    $("lockRange").addEventListener("input", recalc);
-
-    // -----------------------------
-    // Options cards
-    // -----------------------------
-    const sparkPaths = {
-      wavy:    "M2 46 C 18 38, 26 54, 40 46 S 62 38, 78 46 S 98 56, 112 46 S 138 38, 156 46 S 182 54, 198 46",
-      wavy2:   "M2 46 C 20 54, 28 32, 44 46 S 70 56, 88 46 S 112 32, 132 46 S 156 58, 176 46 S 190 34, 198 46",
-      flat:    "M2 46 C 30 46, 60 46, 88 46 S 140 46, 198 46",
-      spiky:   "M2 46 C 18 18, 34 74, 52 46 S 78 18, 96 46 S 120 80, 140 46 S 162 18, 178 46 S 190 70, 198 46",
-      spiky2:  "M2 46 C 12 70, 22 12, 40 46 S 60 74, 78 46 S 98 12, 116 46 S 140 82, 156 46 S 176 12, 190 46 S 196 60, 198 46",
-      wavefast:"M2 46 C 10 36, 18 56, 26 46 S 42 36, 58 46 S 74 56, 90 46 S 106 36, 122 46 S 138 56, 154 46 S 170 36, 186 46 S 194 56, 198 46",
-    };
-
-    function cardIcon(ticker){
-      // tiny “logo” badges (simple)
-      const map = {
-        ETH: { bg:"rgba(6,182,212,.15)", fg:"rgba(6,182,212,.95)", txt:"Ξ" },
-        DOT: { bg:"rgba(236,72,153,.15)", fg:"rgba(236,72,153,.95)", txt:"●" },
-        ATOM:{ bg:"rgba(148,163,184,.15)", fg:"rgba(148,163,184,.9)", txt:"✦" },
-        ADA: { bg:"rgba(124,58,237,.15)", fg:"rgba(124,58,237,.95)", txt:"◈" },
-        SOL: { bg:"rgba(34,197,94,.15)", fg:"rgba(34,197,94,.9)", txt:"≋" },
-        NEAR:{ bg:"rgba(255,255,255,.12)", fg:"rgba(255,255,255,.9)", txt:"N" },
-      };
-      return map[ticker] || { bg:"rgba(255,255,255,.12)", fg:"rgba(255,255,255,.9)", txt:"◎" };
-    }
-
-    function renderOptions(list){
-      const grid = $("optionsGrid");
-      grid.innerHTML = "";
-      list.forEach(opt=>{
-        const ic = cardIcon(opt.ticker);
-        const div = document.createElement("div");
-        div.className = "glass rounded-3xl p-5 hover:translate-y-[-2px] transition shadow-soft";
-        div.innerHTML = `
-          <div class="flex items-start justify-between gap-3">
-            <div class="flex items-center gap-3">
-              <div class="h-10 w-10 rounded-2xl flex items-center justify-center"
-                   style="background:${ic.bg}; border:1px solid rgba(255,255,255,.10)">
-                <span style="color:${ic.fg}; font-weight:800">${ic.txt}</span>
-              </div>
-              <div>
-                <div class="font-bold">${opt.name}</div>
-                <div class="text-xs text-white/55 -mt-0.5">${opt.ticker}</div>
-              </div>
-            </div>
-
-            <button class="btn rounded-xl px-3 py-2 text-sm" data-stake="${opt.ticker}">
-              Stake
-            </button>
-          </div>
-
-          <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
-            <div class="glass-dark rounded-2xl p-4">
-              <div class="text-xs text-white/60">APY</div>
-              <div class="mt-1 text-xl font-extrabold">~ ${opt.apy.toFixed(2)}%</div>
-            </div>
-            <div class="glass-dark rounded-2xl p-4">
-              <div class="text-xs text-white/60">Unstake</div>
-              <div class="mt-1 text-xl font-extrabold">${opt.unstake}</div>
-            </div>
-          </div>
-
-          <div class="mt-3 flex items-center justify-between text-xs text-white/60">
-            <span>Minimum</span>
-            <span class="text-white/80 font-semibold">${opt.min}</span>
-          </div>
-
-          <div class="mt-4 glass-dark rounded-2xl p-3">
-            <svg viewBox="0 0 200 60" class="w-full h-12">
-              <path d="${sparkPaths[opt.spark] || sparkPaths.wavy}" fill="none" stroke="rgba(167,139,250,.85)" stroke-width="2.2" stroke-linecap="round"/>
-              <path d="${sparkPaths[opt.spark] || sparkPaths.wavy}" fill="none" stroke="rgba(6,182,212,.25)" stroke-width="6" stroke-linecap="round"/>
-            </svg>
-          </div>
-        `;
-        grid.appendChild(div);
+    // bind stake buttons
+    grid.querySelectorAll("[data-stake]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const t = btn.getAttribute("data-stake");
+        setSelected(t);
+        if (typeof openModal === "function") openModal();
       });
+    });
+  }
 
-      // bind stake buttons
-      grid.querySelectorAll("[data-stake]").forEach(btn=>{
-        btn.addEventListener("click", ()=>{
-          const t = btn.getAttribute("data-stake");
-          setSelected(t);
-          openModal();
-        });
-      });
-    }
+  // -----------------------------
+  // shuffle/sort (FIXED for 100%+ APY)
+  // keeps APY in a realistic high range (edit as you want)
+  // also syncs ASSETS.baseApy so calculator matches the cards
+  // -----------------------------
+  function shuffleRates(){
+    OPTIONS.forEach(o=>{
+      const mult = rnd(0.95, 1.05);          // small drift
+      o.apy = clamp(o.apy * mult, 50, 200);  // keep 100%+ valid
+      const a = ASSETS.find(x => x.ticker === o.ticker);
+      if (a) a.baseApy = o.apy;
+    });
 
-    // shuffle/sort
-    function shuffleRates(){
-      OPTIONS.forEach(o=>{
-        // +- 15%
-        const mult = rnd(0.88, 1.12);
-        o.apy = clamp(o.apy * mult, 1.5, 24);
-      });
-      renderOptions(OPTIONS);
-    }
-    function sortByApy(){
-      OPTIONS.sort((a,b)=> b.apy - a.apy);
-      renderOptions(OPTIONS);
-    }
-
-    $("btnShuffle").addEventListener("click", shuffleRates);
-    $("btnShuffleM").addEventListener("click", shuffleRates);
-    $("btnSort").addEventListener("click", sortByApy);
-    $("btnSortM").addEventListener("click", sortByApy);
-
-
-
-
-
-    // -----------------------------
-    // Init
-    // -----------------------------
-    $("year").textContent = new Date().getFullYear();
-
-    renderAssetMenu();
     renderOptions(OPTIONS);
-    setSelected("ETH");
     recalc();
-  </script>
+  }
+
+  function sortByApy(){
+    OPTIONS.sort((a,b)=> b.apy - a.apy);
+    renderOptions(OPTIONS);
+  }
+
+  $("btnShuffle")?.addEventListener("click", shuffleRates);
+  $("btnShuffleM")?.addEventListener("click", shuffleRates);
+  $("btnSort")?.addEventListener("click", sortByApy);
+  $("btnSortM")?.addEventListener("click", sortByApy);
+
+  // -----------------------------
+  // Init
+  // -----------------------------
+  const yearEl = $("year");
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+  renderAssetMenu();
+  renderOptions(OPTIONS);
+  setSelected("ETH");
+  recalc();
+</script>
+
 </body>
 </html>
