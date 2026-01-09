@@ -107,7 +107,296 @@
     /* modal */
     .modal-backdrop{ background: rgba(0,0,0,.55); backdrop-filter: blur(6px); }
     .hidden-soft{ display:none; }
-  </style>
+ 
+ 
+ /* === PROMO BANNER MAIN === */
+.promo-banner {
+  background: linear-gradient(95deg, #1472ff26, #33f3ff00, #12e4d1);
+  padding: 22px 26px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 0 40px rgba(0,255,190,0.35);
+  animation: bannerFade 0.6s ease-out, pulseGlow 3.4s infinite ease-in-out;
+  z-index: 50;
+  transition: all .4s ease;
+}
+
+@keyframes bannerFade {
+  from { opacity: 0; transform: translateY(-22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* === Glow Breath Animation === */
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 22px rgba(0,255,190,0.25), 0 0 40px rgba(0,255,190,0.10); }
+  50% { box-shadow: 0 0 40px rgba(0,255,190,0.40), 0 0 70px rgba(0,255,190,0.25); }
+  100% { box-shadow: 0 0 22px rgba(0,255,190,0.25), 0 0 40px rgba(0,255,190,0.10); }
+}
+
+/* === Hover Glow Strong === */
+.promo-banner:hover {
+  box-shadow: 0 0 60px #12e4d1, 0 0 120px rgba(0,255,190,0.6);
+  transition: 0.25s ease;
+}
+
+/* === MINIMIZED MODE (Bubble Widget) === */
+.promo-banner.minimized {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  padding: 0;
+  cursor: pointer;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 99999;
+  animation: pulseGlow 2.2s infinite ease-in-out, bubbleFloat 4s infinite ease-in-out;
+}
+
+/* Bubble float motion */
+@keyframes bubbleFloat {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+}
+
+/* Hide content except coin when minimized */
+.promo-banner.minimized .promo-toggle,
+.promo-banner.minimized .max-w-6xl,
+.promo-banner.minimized .promo-particles {
+  display: none !important;
+}
+
+/* === Toggle Button === */
+.promo-toggle {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: rgba(0,0,0,0.25);
+  border-radius: 8px;
+  padding: 4px 9px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #fff;
+  transition: .3s;
+}
+.promo-toggle:hover {
+  background: rgba(0,0,0,0.45);
+}
+
+/* === COIN 3D — NOW WITH VIBRATION + GLOW + SHINE === */
+#promoIcon {
+  width: 60%;
+  height: 60%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.promo-banner.minimized #promoIcon {
+  display: flex !important;
+}
+
+.coin3d {
+  width: 60px;
+  height: 60px;
+
+  animation: 
+      spinCoin 3.5s infinite linear,
+      coinVibrate 1.7s infinite ease-in-out,
+      coinShimmer 4s infinite ease-in-out;
+
+  transform-style: preserve-3d;
+
+  filter: 
+      drop-shadow(0 0 12px #12e4d1)
+      drop-shadow(0 0 25px rgba(0,255,190,0.6));
+}
+
+/* Spin Animation */
+@keyframes spinCoin {
+  from { transform: rotateY(0deg); }
+  to   { transform: rotateY(360deg); }
+}
+
+/* Vibration soft */
+@keyframes coinVibrate {
+  0% { transform: translateX(0) rotateY(0deg); }
+  50% { transform: translateX(1.5px) rotateY(2deg); }
+  100% { transform: translateX(0) rotateY(0deg); }
+}
+
+/* Shine — Reflejo animado */
+@keyframes coinShimmer {
+  0% { filter: drop-shadow(0 0 12px #12e4d1); }
+  50% { filter: drop-shadow(0 0 20px #12e4d1) brightness(1.2); }
+  100% { filter: drop-shadow(0 0 12px #12e4d1); }
+}
+
+/* === PARTICLES BACKGROUND === */
+.promo-particles {
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+  z-index:-1;
+}
+
+.particle {
+  position:absolute;
+  width:6px;
+  height:6px;
+  background:rgba(255,255,255,0.8);
+  border-radius:50%;
+  filter:blur(1px);
+  animation: rise 6s linear infinite;
+}
+
+@keyframes rise {
+  0%   { transform: translateY(40px) scale(0.4); opacity: .7; }
+  100% { transform: translateY(-140px) scale(1); opacity: 0; }
+}
+
+/* === CTAS === */
+.desktop-cta { display:block; }
+.mobile-cta { display:none; }
+
+@media (max-width:768px) {
+  .desktop-cta { display:none !important; }
+  .mobile-cta {
+    display:inline-block !important;
+    background:#000;
+    color:#00ff9c;
+    padding:14px 28px;
+    border-radius:12px;
+    font-size:1.1rem;
+    font-weight:800;
+    box-shadow:0 0 14px rgba(0,255,160,0.7);
+    animation: floatMobile 2s infinite ease-in-out;
+  }
+}
+
+@keyframes floatMobile {
+  0%{ transform:translateY(0); }
+  50%{ transform:translateY(-8px); }
+  100%{ transform:translateY(0); }
+}
+
+/* === Main Text & Progress === */
+.promo-banner h2 {
+  font-size:1.45rem;
+  font-weight:900;
+}
+
+.highlight {
+  color:#00ff6e;
+  text-shadow:0 0 10px rgba(0,255,120,0.9);
+}
+
+.promo-claimed {
+  font-size: 0.84rem;
+  font-weight:600;
+  margin-top: 4px;
+}
+
+.promo-progress {
+  margin-top: 12px;
+  height: 8px;
+  width: 160px;
+  background: rgba(0,0,0,0.25);
+  border-radius:20px;
+  overflow:hidden;
+}
+.promo-progress-fill {
+  height:100%;
+  width:0%;
+  background: linear-gradient(90deg,#00ff8c,#00ffe0);
+  animation: fillBar 3s forwards ease-out;
+}
+
+@keyframes fillBar {
+  from{ width:0%; }
+  to  { width:100%; }
+}
+
+/* === Floating Desktop CTA === */
+.promo-btn {
+  position: relative;
+    background: #02171d;
+    color: #00ff6e;
+  padding: 12px 34px;
+  border-radius: 999px;
+  font-weight: 800;
+  display: inline-block;
+  box-shadow: 0 0 15px rgba(0,255,170,0.65);
+  animation: floatBtn 2s ease-in-out infinite;
+  overflow: hidden;
+}
+
+
+@keyframes floatBtn {
+  0%   { transform:translateY(0px); }
+  50%  { transform:translateY(-7px); }
+  100% { transform:translateY(0px); }
+}
+
+.promo-btn::after{
+  content:"";
+  position:absolute;
+  top:0;
+  left:-120%;
+  width:60%;
+  height:100%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.9),transparent);
+  transform:skewX(-20deg);
+  animation:shineMove 2.4s infinite ease-in-out;
+}
+
+@keyframes shineMove {
+  0%{ left:-120%; }
+  60%{ left:160%; }
+  100%{ left:160%; }
+}
+
+/* === FLOATING DRAGGABLE BUBBLE (Independent from banner) === */
+.promo-bubble {
+  position: fixed;
+  top: 90px;
+  left: 20px;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(95deg, #1472ff26, #33f3ff00, #12e4d1);
+  box-shadow: 0 0 25px rgba(0,255,190,0.55);
+  backdrop-filter: blur(12px);
+  display: none; /* hidden unless minimized */
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  z-index: 99999;
+  animation: bubbleFloat 4s infinite ease-in-out;
+}
+
+.promo-bubble:active {
+  cursor: grabbing;
+}
+
+/* Coin inside bubble */
+.promo-bubble .coin3d {
+  width: 60px;
+  height: 60px;
+}
+
+.z-9999 {
+    z-index: 9999;
+}
+ </style>
 </head>
 
 <body class="text-white font-sans selection:bg-white/20">
@@ -117,7 +406,7 @@
   </div>
 
   <!-- Header -->
-  <header class="sticky top-0 z-50">
+  <header class="sticky top-0 z-9999">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="mt-4 glass rounded-2xl ring-glow">
         <div class="flex items-center justify-between px-4 sm:px-6 py-3">
@@ -181,6 +470,48 @@
       </div>
     </div>
   </header>
+  <br>
+<div id="promoBanner" class="promo-banner">
+
+  <!-- PARTICLES -->
+  <div class="promo-particles" id="particleContainer"></div>
+
+  <!-- Minimize/Maximize Button -->
+  <div id="promoToggle" class="promo-toggle">–</div>
+
+
+
+  <!-- MAIN CONTENT -->
+  <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+    
+    <div class="text-center md:text-left">
+      <h2>
+        Earn <span class="highlight">$20</span> Instantly — 
+        Plus <span class="highlight">$20</span> Per Friend You Invite!
+      </h2>
+
+      <div id="claimedCounter" class="promo-claimed">
+        5k+ users claimed
+      </div>
+
+      <div class="promo-progress">
+        <div class="promo-progress-fill"></div>
+      </div>
+    </div>
+
+    <!-- Desktop CTA -->
+    <a id="signup" href="#signup" class="promo-btn desktop-cta">
+      EARN $20 • SIGN UP
+    </a>
+
+    <!-- Mobile CTA -->
+    <a id="signup" href="#signup" class="mobile-cta">
+      Claim $25 Bonus
+    </a>
+
+  </div>
+</div>
+
 
   <!-- Hero -->
   <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -776,6 +1107,100 @@ function recalc(){
   setSelected("ETH");
   recalc();
 </script>
+<script>
+const banner = document.getElementById("promoBanner");
+const toggleBtn = document.getElementById("promoToggle");
+const bubble = document.getElementById("promoBubble");
 
+/* Restore minimized state */
+if (localStorage.getItem("promoMinimized") === "1") {
+  banner.style.display = "none";
+  bubble.style.display = "flex";
+}
+
+/* Minimize / Maximize */
+toggleBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+
+  const minimized = bubble.style.display === "flex";
+
+  if (minimized) {
+    bubble.style.display = "none";
+    banner.style.display = "block";
+    localStorage.setItem("promoMinimized", "0");
+  } else {
+    bubble.style.display = "flex";
+    banner.style.display = "none";
+    localStorage.setItem("promoMinimized", "1");
+  }
+});
+
+/* Clicking bubble restores banner */
+bubble.addEventListener("click", () => {
+  bubble.style.display = "none";
+  banner.style.display = "block";
+  localStorage.setItem("promoMinimized", "0");
+});
+
+/* ========= DRAGGABLE BUBBLE ========= */
+
+let drag = false;
+let offsetX = 0;
+let offsetY = 0;
+
+bubble.addEventListener("mousedown", (e) => {
+  drag = true;
+  offsetX = e.clientX - bubble.offsetLeft;
+  offsetY = e.clientY - bubble.offsetTop;
+  bubble.style.transition = "none";
+  e.preventDefault();
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (!drag) return;
+  bubble.style.left = (e.clientX - offsetX) + "px";
+  bubble.style.top  = (e.clientY - offsetY) + "px";
+});
+
+document.addEventListener("mouseup", () => {
+  drag = false;
+  bubble.style.transition = "all .35s ease";
+  localStorage.setItem("bubbleX", bubble.offsetLeft);
+  localStorage.setItem("bubbleY", bubble.offsetTop);
+});
+
+/* Restore bubble position */
+if (localStorage.getItem("bubbleX")) {
+  bubble.style.left = localStorage.getItem("bubbleX") + "px";
+  bubble.style.top  = localStorage.getItem("bubbleY") + "px";
+}
+
+
+/* Counter */
+function updateClaimed(){
+  const el = document.getElementById("claimedCounter");
+  const num = Math.floor(80 + Math.random() * 160);
+  el.textContent = `${num} users claimed today`;
+}
+updateClaimed();
+setInterval(updateClaimed, 7000);
+
+/* Particle generator */
+const particleContainer = document.getElementById("particleContainer");
+
+function createParticle() {
+  const p = document.createElement("div");
+  p.classList.add("particle");
+  p.style.left = Math.random()*100 + "%";
+  p.style.animationDuration = (4 + Math.random()*3) + "s";
+  p.style.opacity = (0.6 + Math.random()*0.4);
+  particleContainer.appendChild(p);
+  setTimeout(()=> p.remove(), 6000);
+}
+
+setInterval(()=> {
+  for(let i=0; i<12; i++) createParticle();
+}, 1000);
+</script>
 </body>
 </html>
